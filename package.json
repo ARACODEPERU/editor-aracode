@@ -1,5 +1,5 @@
 {
-  "name": "editor-aracode",
+  "name": "@elmerrodriguez/editor-aracode",
   "version": "0.1.0",
   "description": "Editor de texto WYSIWYG ligero y moderno",
   "type": "module",
