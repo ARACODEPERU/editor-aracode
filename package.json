@@ -30,6 +30,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && node scripts/postbuild.cjs",
+    "prepare": "npm run build",
     "preview": "vite preview"
   },
   "dependencies": {
