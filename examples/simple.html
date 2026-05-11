@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aracode Editor - Uso simple</title>
+  <link rel="stylesheet" href="../dist/aracode-editor.css" />
+
+</head>
+<body>
+  <div style="max-width: 800px; margin: 40px auto; padding: 0 20px;">
+    <h1 style="font-family: system-ui;">Editor simple</h1>
+    <div id="editor"></div>
+    <br />
+    <button onclick="alert(editor.getHTML())" style="padding: 8px 16px;">Mostrar HTML</button>
+  </div>
+
+  <script src="../dist/aracode-editor.umd.js"></script>
+  <script>
+    var editor = new AracodeEditor('#editor', {
+      height: 300,
+      placeholder: 'Escribe algo aquí...',
+      imageUploadUrl: 'http://localhost/editor-aracode/examples/upload.php',
+      value: '<p>Hola <strong>mundo</strong>!</p>',
+    });
+  </script>
+</body>
+</html>

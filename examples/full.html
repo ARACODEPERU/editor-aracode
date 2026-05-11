@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aracode Editor - Demo completa</title>
+  <link rel="stylesheet" href="../dist/aracode-editor.css" />
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 40px 20px;
+      background: #f0f2f5;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 24px;
+      color: #1a1a2e;
+      margin-bottom: 4px;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 24px;
+    }
+    section {
+      margin-bottom: 40px;
+    }
+    section h2 {
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #dee2e6;
+    }
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .actions button {
+      padding: 8px 16px;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .actions button:hover {
+      background: #f8f9fa;
+    }
+    .output {
+      margin-top: 12px;
+      padding: 12px;
+      background: #1e1e2e;
+      color: #cdd6f4;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+      white-space: pre-wrap;
+      word-break: break-all;
+      min-height: 40px;
+    }
+    .editors-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 768px) {
+      .editors-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧩 Aracode Editor</h1>
+    <p class="subtitle">Editor WYSIWYG ligero — Demo completa</p>
+
+    <section>
+      <h2>Editor completo (español)</h2>
+      <div id="editor-full"></div>
+      <div class="actions">
+        <button onclick="showHTML()">📄 Ver HTML</button>
+        <button onclick="setContent()">📝 Insertar contenido</button>
+        <button onclick="clearContent()">🗑️ Limpiar</button>
+        <button onclick="toggleFullscreen()">⛶ Fullscreen</button>
+      </div>
+      <div id="output" class="output">(el HTML aparecerá aquí)</div>
+    </section>
+
+    <section>
+      <h2>Editor minimalista (inglés)</h2>
+      <div id="editor-minimal"></div>
+      <div class="actions">
+        <button onclick="alert(minimalEditor.getHTML())">📄 Ver HTML</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>Editor solo lectura</h2>
+      <div id="editor-readonly"></div>
+    </section>
+  </div>
+
+  <script src="../dist/aracode-editor.umd.js"></script>
+  <script>
+    // --- Editor completo ---
+    var editor = new AracodeEditor('#editor-full', {
+      height: 400,
+      locale: 'es',
+      imageUploadUrl: 'http://localhost/editor-aracode/examples/upload.php',
+      value: [
+        '<h2>🧩 Aracode Editor</h2>',
+        '<p>Este editor incluye <strong>todas</strong> las herramientas disponibles:</p>',
+        '<ul>',
+        '  <li><strong>Formato:</strong> negrita, cursiva, subrayado, tachado</li>',
+        '  <li><strong>Bloques:</strong> encabezados, citas, código, listas</li>',
+        '  <li><strong>Medios:</strong> enlaces, imágenes</li>',
+        '  <li><strong>Utilidades:</strong> deshacer, rehacer, limpiar formato, vista HTML, pantalla completa</li>',
+        '</ul>',
+        '<blockquote>El conocimiento es poder. — Francis Bacon</blockquote>',
+        '<p>Colores: <span style="color:#e03131">rojo</span>, ',
+        '<span style="color:#2f9e44">verde</span>, ',
+        '<span style="color:#1971c2">azul</span>.</p>',
+      ].join(''),
+    });
+
+    editor.on('change', function () {
+      document.getElementById('output').textContent = editor.getExportHTML();
+    });
+
+    document.getElementById('output').textContent = editor.getExportHTML();
+
+    function showHTML() {
+      var w = window.open('', '', 'width=600,height=400');
+      w.document.write('<pre>' + editor.getExportHTML().replace(/</g, '&lt;') + '</pre>');
+    }
+
+    function setContent() {
+      editor.setHTML('<h2>¡Contenido actualizado!</h2><p>Este texto se insertó con <code>setHTML()</code></p>');
+    }
+
+    function clearContent() {
+      editor.setHTML('');
+    }
+
+    function toggleFullscreen() {
+      editor.toggleFullscreen();
+    }
+
+    // --- Editor minimalista (toolbar personalizado) ---
+    var minimalEditor = new AracodeEditor('#editor-minimal', {
+      height: 250,
+      locale: 'en',
+      toolbar: ['bold', 'italic', 'underline', '|', 'link', '|', 'undo', 'redo'],
+      placeholder: 'Write something...',
+    });
+
+    // --- Editor solo lectura ---
+    new AracodeEditor('#editor-readonly', {
+      height: 200,
+      value: '<p>Este editor está en modo <strong>solo lectura</strong>.</p><p>No puedes modificar el contenido.</p>',
+      readOnly: true,
+    });
+  </script>
+</body>
+</html>

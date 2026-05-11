@@ -1,0 +1,54 @@
+{
+  "C:\\laragon\\www\\editor-aracode\\vite.config.js": {
+    "mtime": 1778349586.0879893,
+    "hash": "242ce5693fc56d6eee965e452500d179"
+  },
+  "C:\\laragon\\www\\editor-aracode\\examples\\upload.php": {
+    "mtime": 1778382313.9243102,
+    "hash": "29ddb63e08427a9729e98b06a360699c"
+  },
+  "C:\\laragon\\www\\editor-aracode\\src\\index.js": {
+    "mtime": 1778349427.8774188,
+    "hash": "7880a7b8e305bca858c4c4f81655b5a4"
+  },
+  "C:\\laragon\\www\\editor-aracode\\src\\lang.js": {
+    "mtime": 1778383441.540199,
+    "hash": "22e2b2b4b27c4a81b6d8236ef523437f"
+  },
+  "C:\\laragon\\www\\editor-aracode\\src\\core\\commands.js": {
+    "mtime": 1778385628.5540679,
+    "hash": "e9f83f299899645f5309a4270ac80236"
+  },
+  "C:\\laragon\\www\\editor-aracode\\src\\core\\editor.js": {
+    "mtime": 1778385645.535881,
+    "hash": "57889c16b3da74b7c51cd4de0dd95e22"
+  },
+  "C:\\laragon\\www\\editor-aracode\\src\\core\\toolbar.js": {
+    "mtime": 1778383490.1969771,
+    "hash": "74a25211f86af3de438307c6b3a15b89"
+  },
+  "C:\\laragon\\www\\editor-aracode\\src\\ui\\color-picker.js": {
+    "mtime": 1778349136.3751264,
+    "hash": "58d298ed414658369153112e51a0917c"
+  },
+  "C:\\laragon\\www\\editor-aracode\\src\\ui\\dialog.js": {
+    "mtime": 1778387753.5945697,
+    "hash": "457f81bd18b099750478d9b0520aba13"
+  },
+  "C:\\laragon\\www\\editor-aracode\\src\\ui\\image-controller.js": {
+    "mtime": 1778384163.8993926,
+    "hash": "fb5eeacdb7336debb053730f8372c6c1"
+  },
+  "C:\\laragon\\www\\editor-aracode\\index.html": {
+    "mtime": 1778349320.382671,
+    "hash": "9f0d7328a7a25e36e68e4db1005cf418"
+  },
+  "C:\\laragon\\www\\editor-aracode\\examples\\full.html": {
+    "mtime": 1778349540.3643727,
+    "hash": "58df6f02ae91263903e08fac4ad8e36d"
+  },
+  "C:\\laragon\\www\\editor-aracode\\examples\\simple.html": {
+    "mtime": 1778349538.7601602,
+    "hash": "d880b7ba4811754bec33a70abf181db7"
+  }
+}

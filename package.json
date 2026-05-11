@@ -1,0 +1,33 @@
+{
+  "name": "editor-aracode",
+  "version": "0.1.0",
+  "description": "Editor de texto WYSIWYG ligero y moderno",
+  "type": "module",
+  "main": "dist/aracode-editor.cjs",
+  "module": "dist/aracode-editor.es.js",
+  "unpkg": "dist/aracode-editor.umd.js",
+  "author": "ARACODEPERU",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ARACODEPERU/editor-aracode.git"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/aracode-editor.es.js",
+      "require": "./dist/aracode-editor.cjs"
+    },
+    "./dist/*": "./dist/*"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && node scripts/postbuild.cjs",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0"
+  }
+}

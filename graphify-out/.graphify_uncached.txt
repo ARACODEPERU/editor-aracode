@@ -1,0 +1,13 @@
+C:\laragon\www\editor-aracode\vite.config.js
+C:\laragon\www\editor-aracode\examples\upload.php
+C:\laragon\www\editor-aracode\src\index.js
+C:\laragon\www\editor-aracode\src\lang.js
+C:\laragon\www\editor-aracode\src\core\commands.js
+C:\laragon\www\editor-aracode\src\core\editor.js
+C:\laragon\www\editor-aracode\src\core\toolbar.js
+C:\laragon\www\editor-aracode\src\ui\color-picker.js
+C:\laragon\www\editor-aracode\src\ui\dialog.js
+C:\laragon\www\editor-aracode\src\ui\image-controller.js
+C:\laragon\www\editor-aracode\index.html
+C:\laragon\www\editor-aracode\examples\full.html
+C:\laragon\www\editor-aracode\examples\simple.html

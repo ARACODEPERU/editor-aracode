@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aracode Editor - Demo</title>
+  <link rel="stylesheet" href="src/styles/editor.css" />
+</head>
+<body>
+  <div style="max-width: 900px; margin: 40px auto; padding: 0 20px;">
+    <h1 style="font-family: system-ui; font-size: 28px; margin-bottom: 8px;">🧩 Aracode Editor</h1>
+    <p style="font-family: system-ui; color: #666; margin-bottom: 24px;">
+      Editor de texto WYSIWYG ligero y moderno
+    </p>
+
+    <h2 style="font-family: system-ui; font-size: 18px; margin-bottom: 12px;">Editor completo</h2>
+    <div id="editor"></div>
+
+    <div style="margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap;">
+      <button id="getHTML" style="padding: 8px 16px;">Obtener HTML</button>
+      <button id="setHTML" style="padding: 8px 16px;">Insertar contenido</button>
+      <button id="destroyBtn" style="padding: 8px 16px;">Destruir</button>
+    </div>
+
+    <div style="margin-top: 20px;">
+      <h3 style="font-family: system-ui; font-size: 14px; margin-bottom: 6px; color: #666;">HTML output:</h3>
+      <pre id="output" style="background: #f5f5f5; padding: 12px; border-radius: 6px; font-size: 13px; min-height: 40px; white-space: pre-wrap; word-break: break-all;"></pre>
+    </div>
+  </div>
+
+  <script type="module">
+    import AracodeEditor from './src/index.js';
+
+    const editor = new AracodeEditor('#editor', {
+      height: 450,
+      locale: 'es',
+      imageUploadUrl: 'http://localhost/editor-aracode/examples/upload.php',
+      value: `
+        <h2>¡Bienvenido a Aracode Editor!</h2>
+        <p>Este es un editor de texto <strong>WYSIWYG</strong> ligero y moderno.</p>
+        <p>Puedes usar las herramientas del toolbar para dar formato al texto:</p>
+        <ul>
+          <li><strong>Negrita</strong>, <em>cursiva</em>, <u>subrayado</u></li>
+          <li>Listas ordenadas y desordenadas</li>
+          <li>Enlaces e imágenes</li>
+          <li>Y mucho más...</li>
+        </ul>
+        <blockquote>El único límite es tu imaginación.</blockquote>
+      `,
+    });
+
+    editor.on('change', () => {
+      document.getElementById('output').textContent = editor.getExportHTML();
+    });
+
+    document.getElementById('output').textContent = editor.getExportHTML();
+
+    document.getElementById('getHTML').addEventListener('click', () => {
+      alert(editor.getExportHTML());
+    });
+
+    document.getElementById('setHTML').addEventListener('click', () => {
+      editor.setHTML('<h2>Contenido actualizado</h2><p>Este texto fue insertado con <code>setHTML()</code></p>');
+    });
+
+    document.getElementById('destroyBtn').addEventListener('click', () => {
+      editor.destroy();
+      document.getElementById('output').textContent = '(editor destruido)';
+    });
+  </script>
+</body>
+</html>
