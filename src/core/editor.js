@@ -16,6 +16,8 @@ const DEFAULT_OPTIONS = {
   imageUploadHandler: null,
   imageUploadUrl: null,
   imageUploadFieldName: 'image',
+  imageUploadHeaders: {},
+  imageUploadParams: {},
   imageDeleteDelay: 20000,
   fonts: null,
 };
@@ -441,9 +443,19 @@ export class AracodeEditor {
     formData.append(this.options.imageUploadFieldName || 'image', file);
     if (targetUrl) formData.append('target_url', targetUrl);
 
+    // Append additional params from options
+    if (this.options.imageUploadParams) {
+      for (const [key, value] of Object.entries(this.options.imageUploadParams)) {
+        formData.append(key, value);
+      }
+    }
+
     if (dialog) dialog.updateProgress(20);
     const response = await fetch(this.options.imageUploadUrl, {
       method: 'POST',
+      headers: {
+        ...(this.options.imageUploadHeaders || {}),
+      },
       body: formData,
     });
 
