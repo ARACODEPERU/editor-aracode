@@ -30,18 +30,14 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && node scripts/postbuild.cjs",
-    "prepare": "npm run build",
+    "prepare": "node scripts/ensure-dist.cjs",
     "preview": "vite preview"
   },
   "dependencies": {
-    "express": "^5.2.1"
+    "html2pdf.js": "^0.10.2"
   },
   "devDependencies": {
-    "html2pdf.js": "^0.10.2",
     "vite": "^5.4.0"
-  },
-  "optionalDependencies": {
-    "html2pdf.js": "^0.10.2"
   },
   "module": "dist/aracode-editor.es.js",
   "unpkg": "dist/aracode-editor.umd.js"

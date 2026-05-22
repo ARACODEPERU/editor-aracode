@@ -71,8 +71,26 @@ export class AracodeEditor {
       this.editable.style.minHeight = `${this.options.height}px`;
     }
 
+    this._ensureFontPreconnect();
     this._bindEvents();
     this.emit('ready');
+  }
+
+  _ensureFontPreconnect() {
+    if (typeof document === 'undefined') return;
+    if (document.querySelector('link[data-aracode-fonts-preconnect]')) return;
+    const mark = 'data-aracode-fonts-preconnect';
+    const g = document.createElement('link');
+    g.rel = 'preconnect';
+    g.href = 'https://fonts.googleapis.com';
+    g.setAttribute(mark, '');
+    document.head.appendChild(g);
+    const s = document.createElement('link');
+    s.rel = 'preconnect';
+    s.href = 'https://fonts.gstatic.com';
+    s.crossOrigin = 'anonymous';
+    s.setAttribute(mark, '');
+    document.head.appendChild(s);
   }
 
   _bindEvents() {

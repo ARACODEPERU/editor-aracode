@@ -1,3 +1,5 @@
+import html2pdf from 'html2pdf.js';
+
 /**
  * Abre el diálogo de impresión del navegador (Guardar como PDF).
  */
@@ -38,22 +40,9 @@ export function printEditorAsPdf(html, title = 'Documento') {
 }
 
 /**
- * Descarga un archivo PDF (requiere html2pdf.js instalado en el proyecto).
+ * Descarga un archivo PDF (html2pdf.js incluido en el bundle del editor).
  */
-async function resolveHtml2pdf() {
-  try {
-    return (await import('html2pdf.js')).default;
-  } catch {
-    if (typeof window !== 'undefined' && typeof window.html2pdf === 'function') {
-      return window.html2pdf;
-    }
-    throw new Error('html2pdf.js no está disponible');
-  }
-}
-
 export async function downloadEditorAsPdf(html, filename = 'documento-aracode.pdf') {
-  const html2pdf = await resolveHtml2pdf();
-
   const wrapper = document.createElement('div');
   wrapper.innerHTML = html;
   wrapper.style.cssText = 'position:fixed;left:-9999px;top:0;width:210mm;background:#fff;';

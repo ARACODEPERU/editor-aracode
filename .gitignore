@@ -1,7 +1,9 @@
 node_modules
-dist
 .env
 .DS_Store
 *.log
 *.tmp
 .vite
+
+# Salida local de Graphify (análisis de código; no es parte del paquete)
+graphify-out/
