@@ -1,7 +1,14 @@
 {
   "name": "@elmerrodriguez/editor-aracode",
-  "version": "0.1.0",
-  "description": "Editor de texto WYSIWYG ligero y moderno",
+  "version": "0.2.0",
+  "description": "Editor de texto WYSIWYG ligero y portable para cualquier proyecto web",
+  "keywords": [
+    "wysiwyg",
+    "editor",
+    "rich-text",
+    "contenteditable",
+    "aracode"
+  ],
   "homepage": "https://github.com/ARACODEPERU/editor-aracode#readme",
   "bugs": {
     "url": "https://github.com/ARACODEPERU/editor-aracode/issues"
@@ -16,10 +23,16 @@
   "exports": {
     ".": {
       "import": "./dist/aracode-editor.es.js",
-      "require": "./dist/aracode-editor.cjs"
+      "require": "./dist/aracode-editor.cjs",
+      "default": "./dist/aracode-editor.es.js"
     },
+    "./style.css": "./dist/aracode-editor.css",
+    "./dist/aracode-editor.css": "./dist/aracode-editor.css",
     "./dist/*": "./dist/*"
   },
+  "sideEffects": [
+    "**/*.css"
+  ],
   "main": "dist/aracode-editor.cjs",
   "directories": {
     "example": "examples"
@@ -33,10 +46,9 @@
     "prepare": "node scripts/ensure-dist.cjs",
     "preview": "vite preview"
   },
-  "dependencies": {
-    "html2pdf.js": "^0.10.2"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "html2pdf.js": "^0.10.2",
     "vite": "^5.4.0"
   },
   "module": "dist/aracode-editor.es.js",
