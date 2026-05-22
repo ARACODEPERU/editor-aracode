@@ -98,8 +98,11 @@ const TOOL_COMMAND_STATE = {
   table: false,
 };
 
-function preventFocusLoss(el) {
-  el.addEventListener('mousedown', (e) => e.preventDefault());
+function preventFocusLoss(el, editor) {
+  el.addEventListener('mousedown', (e) => {
+    editor?.saveToolbarSelection?.();
+    e.preventDefault();
+  });
 }
 
 export class Toolbar {
@@ -140,7 +143,7 @@ export class Toolbar {
           option.textContent = opt.label;
           select.appendChild(option);
         });
-        preventFocusLoss(select);
+        preventFocusLoss(select, this.editor);
         select.addEventListener('change', () => {
           const val = parseInt(select.value, 10);
           this.editor.commands.heading(val);
@@ -152,22 +155,19 @@ export class Toolbar {
       }
 
       if (tool === 'table') {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'aracode-table-picker-wrap';
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'aracode-toolbar-btn';
         btn.innerHTML = TOOL_ICONS.table || '';
         btn.title = t('table', this.editor.options.locale);
         btn.dataset.tool = tool;
-        preventFocusLoss(btn);
+        preventFocusLoss(btn, this.editor);
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
           this.container.querySelectorAll('.aracode-font-popover').forEach((el) => el.remove());
-          this.tablePicker.toggle(btn, wrapper);
+          this.tablePicker.toggle();
         });
-        wrapper.appendChild(btn);
-        group.appendChild(wrapper);
+        group.appendChild(btn);
         this.buttons.table = btn;
         return;
       }
@@ -180,7 +180,7 @@ export class Toolbar {
         btn.type = 'button';
         btn.textContent = t('fontFamily', this.editor.options.locale);
         btn.title = t('fontFamily', this.editor.options.locale);
-        preventFocusLoss(btn);
+        preventFocusLoss(btn, this.editor);
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
           this.tablePicker.close();
@@ -199,7 +199,7 @@ export class Toolbar {
         btn.innerHTML = TOOL_ICONS[tool] || '';
         btn.title = t(tool, this.editor.options.locale);
         btn.dataset.tool = tool;
-        preventFocusLoss(btn);
+        preventFocusLoss(btn, this.editor);
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
           const isTextColor = tool === 'textColor';
@@ -216,7 +216,7 @@ export class Toolbar {
       btn.innerHTML = TOOL_ICONS[tool] || tool;
       btn.title = t(tool, this.editor.options.locale);
       btn.dataset.tool = tool;
-      preventFocusLoss(btn);
+      preventFocusLoss(btn, this.editor);
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         this.handleToolClick(tool);

@@ -7,7 +7,9 @@ export class Commands {
 
   exec(name, value = null) {
     const editable = this.editor.editable;
+    const saved = this.editor.consumeToolbarSelection();
     editable.focus();
+    if (saved) this.editor.restoreToolbarSelection(saved);
     document.execCommand(name, false, value);
     this.editor.emit('change', this.editor.getHTML());
     this.editor.emit('command', name, value);
@@ -17,8 +19,115 @@ export class Commands {
   italic() { this.exec('italic'); }
   underline() { this.exec('underline'); }
   strikethrough() { this.exec('strikeThrough'); }
-  orderedList() { this.exec('insertOrderedList'); }
-  unorderedList() { this.exec('insertUnorderedList'); }
+  orderedList() { this._toggleList('ol'); }
+  unorderedList() { this._toggleList('ul'); }
+
+  _toggleList(tagName) {
+    const editable = this.editor.editable;
+    const command = tagName === 'ol' ? 'insertOrderedList' : 'insertUnorderedList';
+    const saved = this.editor.consumeToolbarSelection();
+    editable.focus();
+    if (saved) this.editor.restoreToolbarSelection(saved);
+
+    const beforeHtml = editable.innerHTML;
+    document.execCommand(command, false, null);
+
+    const hasList = this._selectionInList(tagName);
+    if (!hasList || editable.innerHTML === beforeHtml) {
+      this._insertListFallback(tagName, saved);
+    }
+
+    this.editor.emit('change', this.editor.getHTML());
+    this.editor.emit('command', command);
+  }
+
+  _selectionInList(tagName) {
+    const sel = window.getSelection();
+    if (!sel?.rangeCount) return false;
+    let node = sel.anchorNode;
+    if (node?.nodeType === 3) node = node.parentElement;
+    return !!node?.closest?.(tagName);
+  }
+
+  _insertListFallback(tagName, savedRange) {
+    const editable = this.editor.editable;
+    const sel = window.getSelection();
+
+    if (savedRange) {
+      sel.removeAllRanges();
+      sel.addRange(savedRange);
+    }
+
+    if (!sel.rangeCount) {
+      this._appendEmptyList(tagName);
+      return;
+    }
+
+    let node = sel.anchorNode;
+    if (node?.nodeType === 3) node = node.parentElement;
+    const existing = node?.closest?.('ul, ol');
+
+    if (existing && editable.contains(existing)) {
+      if (existing.tagName.toLowerCase() === tagName) {
+        const items = Array.from(existing.querySelectorAll(':scope > li'));
+        const parent = existing.parentNode;
+        items.forEach((li) => {
+          const p = document.createElement('p');
+          p.innerHTML = li.innerHTML || '<br>';
+          parent.insertBefore(p, existing);
+        });
+        existing.remove();
+      } else {
+        const replacement = document.createElement(tagName);
+        replacement.innerHTML = existing.innerHTML;
+        existing.replaceWith(replacement);
+      }
+      return;
+    }
+
+    const range = sel.getRangeAt(0);
+    if (!range.collapsed) {
+      const list = document.createElement(tagName);
+      const li = document.createElement('li');
+      li.appendChild(range.extractContents());
+      list.appendChild(li);
+      range.insertNode(list);
+      this._placeCaretIn(li);
+      return;
+    }
+
+    const block = node?.closest?.('p, div, h1, h2, h3, h4, h5, h6, blockquote, pre, li, td, th');
+    if (block && editable.contains(block) && block !== editable) {
+      const list = document.createElement(tagName);
+      const li = document.createElement('li');
+      li.innerHTML = block.innerHTML || '<br>';
+      list.appendChild(li);
+      block.replaceWith(list);
+      this._placeCaretIn(li);
+      return;
+    }
+
+    this._appendEmptyList(tagName);
+  }
+
+  _appendEmptyList(tagName) {
+    const editable = this.editor.editable;
+    const list = document.createElement(tagName);
+    const li = document.createElement('li');
+    li.innerHTML = '<br>';
+    list.appendChild(li);
+    editable.appendChild(list);
+    this._placeCaretIn(li);
+  }
+
+  _placeCaretIn(element) {
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    range.collapse(false);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
   blockquote() { this.exec('formatBlock', '<blockquote>'); }
   horizontalRule() { this.exec('insertHorizontalRule'); }
   code() {

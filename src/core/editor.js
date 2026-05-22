@@ -71,9 +71,37 @@ export class AracodeEditor {
       this.editable.style.minHeight = `${this.options.height}px`;
     }
 
+    this._toolbarSavedRange = null;
     this._ensureFontPreconnect();
     this._bindEvents();
     this.emit('ready');
+  }
+
+  saveToolbarSelection() {
+    const selection = window.getSelection();
+    if (!selection?.rangeCount) {
+      this._toolbarSavedRange = null;
+      return;
+    }
+    const range = selection.getRangeAt(0);
+    if (!this.editable.contains(range.commonAncestorContainer)) {
+      this._toolbarSavedRange = null;
+      return;
+    }
+    this._toolbarSavedRange = range.cloneRange();
+  }
+
+  consumeToolbarSelection() {
+    const range = this._toolbarSavedRange;
+    this._toolbarSavedRange = null;
+    return range || null;
+  }
+
+  restoreToolbarSelection(range) {
+    if (!range) return;
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
   }
 
   _ensureFontPreconnect() {

@@ -5,31 +5,44 @@ export class TablePicker {
   constructor(editor, onInsert) {
     this.editor = editor;
     this.onInsert = onInsert;
-    this.wrapper = null;
-    this.popover = null;
+    this.overlay = null;
+    this.dialog = null;
     this._outsideHandler = null;
+    this._keyHandler = null;
     this._headerRow = false;
+    this._savedRange = null;
   }
 
-  toggle(anchor, wrapper) {
-    if (this.popover && this.wrapper === wrapper) {
+  toggle() {
+    if (this.overlay) {
       this.close();
       return;
     }
-    this.close();
-    this.wrapper = wrapper;
     this._savedRange = this._saveSelection();
-    this._render(anchor);
+    this._render();
   }
 
   close() {
+    if (this._keyHandler) {
+      document.removeEventListener('keydown', this._keyHandler);
+      this._keyHandler = null;
+    }
     if (this._outsideHandler) {
       document.removeEventListener('mousedown', this._outsideHandler, true);
       this._outsideHandler = null;
     }
-    if (this.popover?.parentNode) this.popover.parentNode.removeChild(this.popover);
-    this.popover = null;
-    this.wrapper = null;
+    if (this.overlay?.parentNode) {
+      this.overlay.parentNode.removeChild(this.overlay);
+    }
+    this.overlay = null;
+    this.dialog = null;
+    if (!this._otherModalOpen()) {
+      document.body.style.overflow = '';
+    }
+  }
+
+  _otherModalOpen() {
+    return !!document.querySelector('.aracode-dialog-overlay:not(.aracode-table-picker-overlay)');
   }
 
   _saveSelection() {
@@ -53,10 +66,35 @@ export class TablePicker {
     return Math.max(1, Math.min(TABLE_MAX_SIZE, n));
   }
 
-  _render(anchor) {
+  _render() {
     const locale = this.editor.options.locale;
-    const popover = document.createElement('div');
-    popover.className = 'aracode-table-popover';
+    document.body.style.overflow = 'hidden';
+
+    const overlay = document.createElement('div');
+    overlay.className = 'aracode-dialog-overlay aracode-table-picker-overlay';
+    overlay.setAttribute('role', 'presentation');
+
+    const dialog = document.createElement('div');
+    dialog.className = 'aracode-dialog aracode-table-picker-dialog';
+    dialog.setAttribute('role', 'dialog');
+    dialog.setAttribute('aria-modal', 'true');
+    dialog.setAttribute('aria-label', t('table', locale));
+
+    const header = document.createElement('div');
+    header.className = 'aracode-dialog-header';
+    header.textContent = t('table', locale);
+
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'aracode-dialog-close';
+    closeBtn.setAttribute('aria-label', t('cancel', locale));
+    closeBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+    closeBtn.addEventListener('mousedown', (e) => e.preventDefault());
+    closeBtn.addEventListener('click', () => this.close());
+    header.appendChild(closeBtn);
+
+    const body = document.createElement('div');
+    body.className = 'aracode-dialog-body aracode-table-picker-body';
 
     const label = document.createElement('div');
     label.className = 'aracode-table-picker-label';
@@ -145,18 +183,40 @@ export class TablePicker {
     options.appendChild(headerCheck);
     options.appendChild(document.createTextNode(t('tableHeaderRow', locale)));
 
-    popover.appendChild(label);
-    popover.appendChild(grid);
-    popover.appendChild(custom);
-    popover.appendChild(options);
-    this.wrapper.appendChild(popover);
-    this.popover = popover;
+    body.appendChild(label);
+    body.appendChild(grid);
+    body.appendChild(custom);
+    body.appendChild(options);
 
-    this._outsideHandler = (e) => {
-      if (popover.contains(e.target) || anchor.contains(e.target)) return;
-      this.close();
+    const footer = document.createElement('div');
+    footer.className = 'aracode-dialog-footer';
+    const cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.className = 'aracode-btn aracode-btn-secondary';
+    cancelBtn.textContent = t('cancel', locale);
+    cancelBtn.addEventListener('mousedown', (e) => e.preventDefault());
+    cancelBtn.addEventListener('click', () => this.close());
+    footer.appendChild(cancelBtn);
+
+    dialog.appendChild(header);
+    dialog.appendChild(body);
+    dialog.appendChild(footer);
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+
+    this.overlay = overlay;
+    this.dialog = dialog;
+
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) this.close();
+    });
+
+    this._keyHandler = (e) => {
+      if (e.key === 'Escape') this.close();
     };
-    setTimeout(() => document.addEventListener('mousedown', this._outsideHandler, true), 0);
+    document.addEventListener('keydown', this._keyHandler);
+
+    setTimeout(() => dialog.classList.add('is-open'), 10);
   }
 
   _setHover(rows, cols, grid, label, locale) {

@@ -434,10 +434,28 @@
 .aracode-editable ol {
   margin: 0.5em 0;
   padding-left: 2em;
+  list-style-position: outside;
+}
+
+.aracode-editable ul {
+  list-style-type: disc;
+}
+
+.aracode-editable ol {
+  list-style-type: decimal;
+}
+
+.aracode-editable ul ul {
+  list-style-type: circle;
+}
+
+.aracode-editable ul ul ul {
+  list-style-type: square;
 }
 
 .aracode-editable li {
   margin: 0.25em 0;
+  display: list-item;
 }
 
 .aracode-editable hr {
@@ -469,22 +487,24 @@
   text-align: left;
 }
 
-.aracode-table-picker-wrap {
-  position: relative;
-  display: inline-flex;
+.aracode-table-picker-overlay {
+  align-items: center;
+  padding: 24px 16px;
 }
 
-.aracode-table-popover {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  z-index: 10040;
-  padding: 10px;
-  background: #ffffff;
-  border: 1px solid var(--aracode-toolbar-border);
-  border-radius: var(--aracode-radius);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  min-width: 220px;
+.aracode-table-picker-dialog {
+  width: auto;
+  min-width: 260px;
+  max-width: min(320px, 92vw);
+}
+
+.aracode-table-picker-dialog.is-open {
+  animation: aracode-slide-up 0.2s ease;
+}
+
+.aracode-table-picker-body {
+  padding-top: 12px;
+  padding-bottom: 8px;
 }
 
 .aracode-table-picker-label {
