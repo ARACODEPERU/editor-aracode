@@ -37,7 +37,11 @@
     "express": "^5.2.1"
   },
   "devDependencies": {
+    "html2pdf.js": "^0.10.2",
     "vite": "^5.4.0"
+  },
+  "optionalDependencies": {
+    "html2pdf.js": "^0.10.2"
   },
   "module": "dist/aracode-editor.es.js",
   "unpkg": "dist/aracode-editor.umd.js"

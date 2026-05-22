@@ -4,6 +4,9 @@ import { Commands } from './commands.js';
 import { Dialog, startCountdown } from '../ui/dialog.js';
 import { ColorPicker } from '../ui/color-picker.js';
 import { ImageController } from '../ui/image-controller.js';
+import { TableController } from '../ui/table-controller.js';
+import { handleBlockExitKeydown } from './block-exit.js';
+import { printEditorAsPdf, downloadEditorAsPdf } from './pdf-export.js';
 
 const DEFAULT_OPTIONS = {
   height: 400,
@@ -61,8 +64,8 @@ export class AracodeEditor {
     this.container.appendChild(this.toolbar.container);
     this.container.appendChild(this.editable);
 
-    // Inicializar ImageController después de crear el editable
     this.imageController = new ImageController(this);
+    this.tableController = new TableController(this);
 
     if (this.options.height) {
       this.editable.style.minHeight = `${this.options.height}px`;
@@ -93,6 +96,10 @@ export class AracodeEditor {
 
     this.editable.addEventListener('keyup', () => {
       this.toolbar.updateActiveStates();
+    });
+
+    this.editable.addEventListener('keydown', (e) => {
+      handleBlockExitKeydown(this, e);
     });
   }
 
@@ -131,6 +138,49 @@ export class AracodeEditor {
       `<div class="aracode-export-content">${content}</div>`,
       '</div>',
     ].join('');
+  }
+
+  /**
+   * Exporta el contenido del editor a PDF.
+   * @param {Object} options
+   * @param {string} [options.filename='documento-aracode.pdf']
+   * @param {string} [options.title='Documento']
+   * @param {'download'|'print'|'auto'} [options.mode='auto'] - auto intenta descarga y usa impresión si falla
+   */
+  async exportToPDF(options = {}) {
+    const {
+      filename = 'documento-aracode.pdf',
+      title = t('exportPdfTitle', this.options.locale),
+      mode = 'auto',
+    } = options;
+
+    if (!this.getText().trim()) {
+      throw new Error(t('exportPdfEmpty', this.options.locale));
+    }
+
+    const html = this.getExportHTML();
+
+    if (mode === 'print') {
+      printEditorAsPdf(html, title);
+      this.emit('exportPdf', { mode: 'print', filename });
+      return { mode: 'print' };
+    }
+
+    if (mode === 'download') {
+      await downloadEditorAsPdf(html, filename);
+      this.emit('exportPdf', { mode: 'download', filename });
+      return { mode: 'download', filename };
+    }
+
+    try {
+      await downloadEditorAsPdf(html, filename);
+      this.emit('exportPdf', { mode: 'download', filename });
+      return { mode: 'download', filename };
+    } catch {
+      printEditorAsPdf(html, title);
+      this.emit('exportPdf', { mode: 'print', filename });
+      return { mode: 'print' };
+    }
   }
 
   _getExportFontImports(content) {
@@ -731,19 +781,35 @@ export class AracodeEditor {
   }
 
   openColorPicker(anchor, isTextColor) {
+    this.toolbar?.tablePicker?.close();
+    if (this.colorPicker?.isOpenFor(anchor)) {
+      this.colorPicker.destroy();
+      this.colorPicker = null;
+      return;
+    }
+
     if (this.colorPicker) this.colorPicker.destroy();
     if (this._searchPanel) {
       this._searchPanel.remove();
       this._searchPanel = null;
     }
-    this.colorPicker = new ColorPicker((color) => {
-      if (color) {
-        if (isTextColor) this.commands.textColor(color);
-        else this.commands.backgroundColor(color);
-      } else {
-        if (isTextColor) this.commands.textColor('');
-        else this.commands.backgroundColor('');
+
+    const selection = window.getSelection();
+    let savedRange = null;
+    if (selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      if (this.editable.contains(range.commonAncestorContainer)) {
+        savedRange = range.cloneRange();
       }
+    }
+
+    this.colorPicker = new ColorPicker((color) => {
+      if (savedRange) {
+        selection.removeAllRanges();
+        selection.addRange(savedRange);
+      }
+      if (isTextColor) this.commands.textColor(color);
+      else this.commands.backgroundColor(color);
     });
     this.colorPicker.show(anchor);
   }
@@ -794,6 +860,7 @@ export class AracodeEditor {
     }
     this.toolbar.destroy();
     this.dialog.destroy();
+    if (this.tableController) this.tableController.destroy();
     if (this.colorPicker) this.colorPicker.destroy();
     if (this._searchPanel) {
       this._searchPanel.remove();

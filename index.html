@@ -19,6 +19,7 @@
     <div style="margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap;">
       <button id="getHTML" style="padding: 8px 16px;">Obtener HTML</button>
       <button id="setHTML" style="padding: 8px 16px;">Insertar contenido</button>
+      <button id="exportPdf" style="padding: 8px 16px;">Exportar PDF</button>
       <button id="destroyBtn" style="padding: 8px 16px;">Destruir</button>
     </div>
 
@@ -61,6 +62,26 @@
 
     document.getElementById('setHTML').addEventListener('click', () => {
       editor.setHTML('<h2>Contenido actualizado</h2><p>Este texto fue insertado con <code>setHTML()</code></p>');
+    });
+
+    document.getElementById('exportPdf').addEventListener('click', async () => {
+      const btn = document.getElementById('exportPdf');
+      btn.disabled = true;
+      btn.textContent = 'Generando PDF...';
+      try {
+        const result = await editor.exportToPDF({
+          filename: 'aracode-editor.pdf',
+          mode: 'download',
+        });
+        if (result.mode === 'print') {
+          alert('Se abrió el diálogo de impresión. Elija "Guardar como PDF" como destino.');
+        }
+      } catch (err) {
+        alert(err.message || 'No se pudo exportar el PDF.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Exportar PDF';
+      }
     });
 
     document.getElementById('destroyBtn').addEventListener('click', () => {

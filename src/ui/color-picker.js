@@ -12,6 +12,8 @@ const COLORS = [
 export class ColorPicker {
   constructor(onSelect) {
     this.onSelect = onSelect;
+    this._anchor = null;
+    this._outsideHandler = null;
     this.container = document.createElement('div');
     this.container.className = 'aracode-color-picker';
     this.build();
@@ -22,42 +24,68 @@ export class ColorPicker {
     grid.className = 'aracode-color-picker-grid';
     COLORS.forEach(color => {
       const btn = document.createElement('button');
+      btn.type = 'button';
       btn.className = 'aracode-color-picker-swatch';
       btn.style.backgroundColor = color;
       btn.dataset.color = color;
+      btn.title = color;
+      btn.addEventListener('mousedown', (e) => e.preventDefault());
       btn.addEventListener('click', (e) => {
+        e.preventDefault();
         e.stopPropagation();
         this.onSelect(color);
         this.hide();
       });
       grid.appendChild(btn);
     });
-    // Remove color button
+
     const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
     removeBtn.className = 'aracode-color-picker-remove';
     removeBtn.textContent = '✕ Sin color';
+    removeBtn.addEventListener('mousedown', (e) => e.preventDefault());
     removeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
       e.stopPropagation();
       this.onSelect('');
       this.hide();
     });
+
     this.container.appendChild(grid);
     this.container.appendChild(removeBtn);
     document.body.appendChild(this.container);
   }
 
+  isOpenFor(anchor) {
+    return this._anchor === anchor && this.container.classList.contains('is-visible');
+  }
+
   show(anchor) {
+    this._anchor = anchor;
     const rect = anchor.getBoundingClientRect();
-    this.container.style.top = `${rect.bottom + window.scrollY + 2}px`;
-    this.container.style.left = `${rect.left + window.scrollX}px`;
+    this.container.style.top = `${rect.bottom + 4}px`;
+    this.container.style.left = `${Math.max(8, rect.left)}px`;
     this.container.classList.add('is-visible');
-    setTimeout(() => document.addEventListener('click', this._outsideHandler = () => this.hide()), 0);
+
+    if (this._outsideHandler) {
+      document.removeEventListener('mousedown', this._outsideHandler, true);
+    }
+
+    this._outsideHandler = (e) => {
+      if (this.container.contains(e.target) || anchor.contains(e.target)) return;
+      this.hide();
+    };
+
+    setTimeout(() => {
+      document.addEventListener('mousedown', this._outsideHandler, true);
+    }, 0);
   }
 
   hide() {
     this.container.classList.remove('is-visible');
+    this._anchor = null;
     if (this._outsideHandler) {
-      document.removeEventListener('click', this._outsideHandler);
+      document.removeEventListener('mousedown', this._outsideHandler, true);
       this._outsideHandler = null;
     }
   }

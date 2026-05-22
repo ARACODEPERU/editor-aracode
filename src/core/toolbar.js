@@ -1,15 +1,16 @@
 import { t } from '../lang.js';
+import { TablePicker } from '../ui/table-picker.js';
 
 const DEFAULT_TOOLS = [
   'bold', 'italic', 'underline', 'strikethrough', '|',
   'heading', 'fontFamily', '|',
   'orderedList', 'unorderedList', '|',
   'alignLeft', 'alignCenter', 'alignRight', 'alignJustify', '|',
-  'link', 'unlink', 'image', '|',
+  'link', 'unlink', 'image', 'table', '|',
   'blockquote', 'codeBlock', 'code', 'horizontalRule', '|',
   'textColor', 'backgroundColor', '|',
   'undo', 'redo', 'removeFormat', '|',
-  'search', 'sourceView', 'fullscreen',
+  'search', 'exportPdf', 'sourceView', 'fullscreen',
 ];
 
 const HEADING_OPTIONS = [
@@ -36,6 +37,7 @@ const TOOL_ICONS = {
   link: '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>',
   unlink: '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M2 5.27L3.28 4 20 20.72 18.73 22l-3.08-3.08c-.53.23-1.1.38-1.65.38H10v-1.9h4c.44 0 .86-.09 1.25-.25l-3.12-3.12H8v-1.9h1.73L5.27 9.05C4.5 9.66 4 10.62 4 12c0 1.71 1.39 3.1 3.1 3.1h4V17H7c-2.76 0-5-2.24-5-5 0-1.83.99-3.43 2.45-4.3L2 5.27zM16 11h4v2h-4v1.9l.06.06L14 12.94V11h2zm-3-4h-1.54L9.27 4.73C9.6 4.28 10.08 4 10.63 4H14v1.9h-4c-.34 0-.66.06-.96.16l-1.36-1.36C8.69 4.26 9.83 4 11 4h2v3z"/></svg>',
   image: '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>',
+  table: '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M4 4h16v16H4V4zm2 2v4h4V6H6zm6 0v4h4V6h-4zm-6 6v4h4v-4H6zm6 0v4h4v-4h-4z"/></svg>',
   blockquote: '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M6 17h3l2-4V7H5v6h3l-2 4zm8 0h3l2-4V7h-6v6h3l-2 4z"/></svg>',
   code: '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>',
   codeBlock: '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 14H5V7h14v10zM9.4 10.5l2.1 2.1-2.1 2.1 1.4 1.4L14.3 12l-3.5-3.5L9.4 10.5z"/></svg>',
@@ -48,6 +50,7 @@ const TOOL_ICONS = {
   textColor: '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M11 3L5.5 17h2.25l1.12-3h6.25l1.12 3h2.25L13 3h-2zm-1.38 9L11 5.5 12.38 12H9.62z"/><path fill="currentColor" d="M3 21h18v-2H3v2z"/></svg>',
   backgroundColor: '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M16.56 8.94L7.62 0 6.21 1.41l2.38 2.38-5.15 5.15a1.49 1.49 0 0 0 0 2.12l5.5 5.5a1.5 1.5 0 0 0 2.12 0l5.15-5.15 2.38 2.38 1.41-1.41-2.38-2.38zM5.5 12.56l4.5-4.5 4.5 4.5-4.5 4.5-4.5-4.5z"/><path fill="currentColor" d="M3 21h18v-2H3v2z"/></svg>',
   search: '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M9.5 3a6.5 6.5 0 0 1 5.18 10.43l5.45 5.44-1.42 1.42-5.44-5.45A6.5 6.5 0 1 1 9.5 3zm0 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9z"/></svg>',
+  exportPdf: '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="#c92a2a" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2l5 5h-5V4zM8 12h2v6H8v-6zm4-3h2v9h-2V9zm4 2h2v7h-2v-7z"/></svg>',
 };
 
 const OPEN_FONTS = [
@@ -71,12 +74,43 @@ const OPEN_FONTS = [
   'Indie Flower', 'Amatic SC', 'Patrick Hand', 'Courgette', 'Sacramento', 'Kaushan Script'
 ];
 
+/** Maps toolbar tool id → document.queryCommandState command name */
+const TOOL_COMMAND_STATE = {
+  bold: 'bold',
+  italic: 'italic',
+  underline: 'underline',
+  strikethrough: 'strikeThrough',
+  orderedList: 'insertOrderedList',
+  unorderedList: 'insertUnorderedList',
+  alignLeft: 'justifyLeft',
+  alignCenter: 'justifyCenter',
+  alignRight: 'justifyRight',
+  alignJustify: 'justifyFull',
+  blockquote: false,
+  unlink: false,
+  undo: false,
+  redo: false,
+  removeFormat: false,
+  search: false,
+  sourceView: false,
+  fullscreen: false,
+  exportPdf: false,
+  table: false,
+};
+
+function preventFocusLoss(el) {
+  el.addEventListener('mousedown', (e) => e.preventDefault());
+}
+
 export class Toolbar {
   constructor(editor) {
     this.editor = editor;
     this.container = document.createElement('div');
     this.container.className = 'aracode-toolbar';
     this.buttons = {};
+    this.tablePicker = new TablePicker(editor, (rows, cols, headerRow, savedRange) => {
+      this.editor.commands.insertTable(rows, cols, headerRow, savedRange);
+    });
     this.build();
   }
 
@@ -106,6 +140,7 @@ export class Toolbar {
           option.textContent = opt.label;
           select.appendChild(option);
         });
+        preventFocusLoss(select);
         select.addEventListener('change', () => {
           const val = parseInt(select.value, 10);
           this.editor.commands.heading(val);
@@ -113,6 +148,27 @@ export class Toolbar {
         });
         group.appendChild(select);
         this.buttons.heading = select;
+        return;
+      }
+
+      if (tool === 'table') {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'aracode-table-picker-wrap';
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'aracode-toolbar-btn';
+        btn.innerHTML = TOOL_ICONS.table || '';
+        btn.title = t('table', this.editor.options.locale);
+        btn.dataset.tool = tool;
+        preventFocusLoss(btn);
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.container.querySelectorAll('.aracode-font-popover').forEach((el) => el.remove());
+          this.tablePicker.toggle(btn, wrapper);
+        });
+        wrapper.appendChild(btn);
+        group.appendChild(wrapper);
+        this.buttons.table = btn;
         return;
       }
 
@@ -124,9 +180,10 @@ export class Toolbar {
         btn.type = 'button';
         btn.textContent = t('fontFamily', this.editor.options.locale);
         btn.title = t('fontFamily', this.editor.options.locale);
-        btn.addEventListener('mousedown', (e) => e.preventDefault());
+        preventFocusLoss(btn);
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
+          this.tablePicker.close();
           this.toggleFontPicker(wrapper);
         });
         wrapper.appendChild(btn);
@@ -137,10 +194,12 @@ export class Toolbar {
 
       if (tool === 'textColor' || tool === 'backgroundColor') {
         const btn = document.createElement('button');
+        btn.type = 'button';
         btn.className = 'aracode-toolbar-btn aracode-toolbar-color-btn';
         btn.innerHTML = TOOL_ICONS[tool] || '';
         btn.title = t(tool, this.editor.options.locale);
         btn.dataset.tool = tool;
+        preventFocusLoss(btn);
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
           const isTextColor = tool === 'textColor';
@@ -152,10 +211,12 @@ export class Toolbar {
       }
 
       const btn = document.createElement('button');
+      btn.type = 'button';
       btn.className = 'aracode-toolbar-btn';
       btn.innerHTML = TOOL_ICONS[tool] || tool;
       btn.title = t(tool, this.editor.options.locale);
       btn.dataset.tool = tool;
+      preventFocusLoss(btn);
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         this.handleToolClick(tool);
@@ -203,8 +264,34 @@ export class Toolbar {
       case 'unlink': cmds.removeLink(); break;
       case 'image': this.editor.openImageDialog(); break;
       case 'search': this.editor.toggleSearchPanel(); break;
+      case 'exportPdf': this.handleExportPdf(); break;
       case 'sourceView': this.editor.toggleSourceView(); break;
       case 'fullscreen': this.editor.toggleFullscreen(); break;
+    }
+  }
+
+  async handleExportPdf() {
+    const btn = this.buttons.exportPdf;
+    const locale = this.editor.options.locale;
+    if (btn) {
+      btn.disabled = true;
+      btn.classList.add('is-loading');
+    }
+    try {
+      const result = await this.editor.exportToPDF({
+        filename: t('exportPdfFilename', locale),
+        mode: 'download',
+      });
+      if (result.mode === 'print') {
+        alert(t('exportPdfPrintHint', locale));
+      }
+    } catch (err) {
+      alert(err.message || t('exportPdfError', locale));
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.classList.remove('is-loading');
+      }
     }
   }
 
@@ -266,17 +353,28 @@ export class Toolbar {
   updateActiveStates() {
     const tools = this.editor.options.toolbar || DEFAULT_TOOLS;
     tools.forEach(tool => {
-      if (tool === '|' || tool === 'heading' || tool === 'fontFamily' || tool === 'textColor' || tool === 'backgroundColor') return;
+      if (tool === '|' || tool === 'heading' || tool === 'fontFamily' || tool === 'table' || tool === 'textColor' || tool === 'backgroundColor') return;
       const btn = this.buttons[tool];
       if (!btn) return;
-      const isActive = document.queryCommandState(tool === 'codeBlock' ? 'bold' :
-        tool === 'sourceView' ? false :
-        tool === 'fullscreen' ? false : tool);
+      const command = TOOL_COMMAND_STATE[tool];
+      let isActive = false;
+      if (command) {
+        try {
+          isActive = document.queryCommandState(command);
+        } catch {
+          isActive = false;
+        }
+      } else if (tool === 'sourceView') {
+        isActive = this.editor._isSourceView;
+      } else if (tool === 'fullscreen') {
+        isActive = this.editor._isFullscreen;
+      }
       btn.classList.toggle('is-active', !!isActive);
     });
   }
 
   destroy() {
+    this.tablePicker.close();
     if (this.container.parentNode) this.container.parentNode.removeChild(this.container);
     this.buttons = {};
   }

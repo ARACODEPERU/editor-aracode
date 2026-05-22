@@ -1,3 +1,5 @@
+import { TABLE_MAX_SIZE } from './table-constants.js';
+
 export class Commands {
   constructor(editor) {
     this.editor = editor;
@@ -19,7 +21,15 @@ export class Commands {
   unorderedList() { this.exec('insertUnorderedList'); }
   blockquote() { this.exec('formatBlock', '<blockquote>'); }
   horizontalRule() { this.exec('insertHorizontalRule'); }
-  code() { this.exec('insertHTML', '<code>$1</code>'); }
+  code() {
+    const sel = window.getSelection();
+    const text = sel.toString() || '';
+    const escaped = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    this.exec('insertHTML', `<code>${escaped}</code>`);
+  }
   removeFormat() { this.exec('removeFormat'); }
   undo() { this.exec('undo'); }
   redo() { this.exec('redo'); }
@@ -44,15 +54,40 @@ export class Commands {
     }
   }
 
-  alignLeft() { this.align('align-left'); }
-  alignCenter() { this.align('align-center'); }
-  alignRight() { this.align('align-right'); }
+  alignLeft() {
+    if (this.editor.imageController?.selectedImage) {
+      this.align('align-left');
+    } else {
+      this.exec('justifyLeft');
+    }
+  }
+
+  alignCenter() {
+    if (this.editor.imageController?.selectedImage) {
+      this.align('align-center');
+    } else {
+      this.exec('justifyCenter');
+    }
+  }
+
+  alignRight() {
+    if (this.editor.imageController?.selectedImage) {
+      this.align('align-right');
+    } else {
+      this.exec('justifyRight');
+    }
+  }
+
   alignJustify() { this.exec('justifyFull'); }
 
   codeBlock() {
     const sel = window.getSelection();
-    const html = sel.toString() || '';
-    this.exec('insertHTML', `<pre><code>${html}</code></pre>`);
+    const text = sel.toString() || '';
+    const escaped = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    this.exec('insertHTML', `<pre><code>${escaped}</code></pre>`);
   }
 
   createLink(url, text, target = '') {
@@ -130,13 +165,74 @@ export class Commands {
   }
 
   textColor(color) {
-    this.exec('foreColor', color);
+    const editable = this.editor.editable;
+    editable.focus();
+    document.execCommand('styleWithCSS', false, true);
+    document.execCommand('foreColor', false, color || '#212529');
+    this.editor.emit('change', this.editor.getHTML());
+    this.editor.emit('command', 'foreColor', color);
   }
 
   backgroundColor(color) {
-    this.exec('hiliteColor', color);
+    const editable = this.editor.editable;
+    editable.focus();
+    document.execCommand('styleWithCSS', false, true);
+    const value = color || 'transparent';
+    if (!document.execCommand('hiliteColor', false, value)) {
+      document.execCommand('backColor', false, value);
+    }
+    this.editor.emit('change', this.editor.getHTML());
+    this.editor.emit('command', 'hiliteColor', color);
   }
 
   indent() { this.exec('indent'); }
   outdent() { this.exec('outdent'); }
+
+  insertTable(rows, cols, headerRow = false, savedRange = null) {
+    const r = Math.max(1, Math.min(TABLE_MAX_SIZE, parseInt(rows, 10) || 1));
+    const c = Math.max(1, Math.min(TABLE_MAX_SIZE, parseInt(cols, 10) || 1));
+    const editable = this.editor.editable;
+
+    let html = '<table class="aracode-table"><tbody>';
+    for (let ri = 0; ri < r; ri++) {
+      html += '<tr>';
+      for (let ci = 0; ci < c; ci++) {
+        const tag = headerRow && ri === 0 ? 'th' : 'td';
+        html += `<${tag}>&nbsp;</${tag}>`;
+      }
+      html += '</tr>';
+    }
+    html += '</tbody></table>';
+
+    const tableNode = document.createElement('div');
+    tableNode.innerHTML = html;
+    const table = tableNode.firstElementChild;
+
+    const sel = window.getSelection();
+    let range;
+    if (savedRange && editable.contains(savedRange.commonAncestorContainer)) {
+      range = savedRange;
+    } else if (sel.rangeCount > 0 && editable.contains(sel.getRangeAt(0).commonAncestorContainer)) {
+      range = sel.getRangeAt(0);
+    }
+
+    editable.focus();
+    if (range) {
+      range.collapse(false);
+      range.insertNode(table);
+      const firstCell = table.querySelector('td, th');
+      if (firstCell) {
+        const newRange = document.createRange();
+        newRange.selectNodeContents(firstCell);
+        newRange.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(newRange);
+      }
+    } else {
+      editable.appendChild(table);
+    }
+
+    this.editor.emit('change', this.editor.getHTML());
+    this.editor.emit('command', 'insertTable', { rows: r, cols: c, headerRow });
+  }
 }

@@ -12,6 +12,17 @@ export default defineConfig({
     cssFileName: 'aracode-editor',
     sourcemap: true,
     minify: 'esbuild',
+    rollupOptions: {
+      external: ['html2pdf.js'],
+      output: {
+        globals: {
+          'html2pdf.js': 'html2pdf',
+        },
+      },
+    },
+  },
+  optimizeDeps: {
+    include: ['html2pdf.js'],
   },
   server: {
     open: true,

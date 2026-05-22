@@ -87,6 +87,7 @@
       <div class="actions">
         <button onclick="showHTML()">📄 Ver HTML</button>
         <button onclick="setContent()">📝 Insertar contenido</button>
+        <button onclick="exportPdf()">📥 Exportar PDF</button>
         <button onclick="clearContent()">🗑️ Limpiar</button>
         <button onclick="toggleFullscreen()">⛶ Fullscreen</button>
       </div>
@@ -107,6 +108,7 @@
     </section>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
   <script src="../dist/aracode-editor.umd.js"></script>
   <script>
     // --- Editor completo ---
@@ -151,6 +153,20 @@
 
     function toggleFullscreen() {
       editor.toggleFullscreen();
+    }
+
+    async function exportPdf() {
+      try {
+        var result = await editor.exportToPDF({
+          filename: 'aracode-editor.pdf',
+          mode: 'download',
+        });
+        if (result.mode === 'print') {
+          alert('Se abrió el diálogo de impresión. Elija "Guardar como PDF" como destino.');
+        }
+      } catch (err) {
+        alert(err.message || 'No se pudo exportar el PDF.');
+      }
     }
 
     // --- Editor minimalista (toolbar personalizado) ---

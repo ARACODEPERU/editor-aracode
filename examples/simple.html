@@ -13,6 +13,7 @@
     <div id="editor"></div>
     <br />
     <button onclick="alert(editor.getHTML())" style="padding: 8px 16px;">Mostrar HTML</button>
+    <button onclick="exportPdf()" style="padding: 8px 16px;">Exportar PDF</button>
   </div>
 
   <script src="../dist/aracode-editor.umd.js"></script>
@@ -23,6 +24,14 @@
       imageUploadUrl: 'http://localhost/editor-aracode/examples/upload.php',
       value: '<p>Hola <strong>mundo</strong>!</p>',
     });
+
+    async function exportPdf() {
+      try {
+        await editor.exportToPDF({ filename: 'documento.pdf', mode: 'download' });
+      } catch (err) {
+        alert(err.message || 'No se pudo exportar el PDF.');
+      }
+    }
   </script>
 </body>
 </html>
