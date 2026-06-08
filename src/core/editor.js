@@ -7,6 +7,7 @@ import { ImageController } from '../ui/image-controller.js';
 import { TableController } from '../ui/table-controller.js';
 import { handleBlockExitKeydown } from './block-exit.js';
 import { printEditorAsPdf, downloadEditorAsPdf } from './pdf-export.js';
+import { bindPasteHandler } from './paste-handler.js';
 
 const DEFAULT_OPTIONS = {
   height: 400,
@@ -22,6 +23,7 @@ const DEFAULT_OPTIONS = {
   imageUploadHeaders: {},
   imageUploadParams: {},
   imageDeleteDelay: 20000,
+  pasteImageUpload: null,
   fonts: null,
 };
 
@@ -147,6 +149,8 @@ export class AracodeEditor {
     this.editable.addEventListener('keydown', (e) => {
       handleBlockExitKeydown(this, e);
     });
+
+    bindPasteHandler(this);
   }
 
   on(event, handler) {

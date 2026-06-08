@@ -985,6 +985,61 @@
   margin: 0 !important;
 }
 
+/* Paste image placeholders */
+.aracode-paste-image {
+  position: relative;
+  box-sizing: border-box;
+  min-width: 80px;
+  min-height: 48px;
+  margin: 0.35em 0.15em;
+  padding: 0.35rem;
+  border: 1px dashed var(--aracode-toolbar-border, #ced4da);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--aracode-toolbar-bg, #f8f9fa) 88%, transparent);
+  vertical-align: middle;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  overflow: hidden;
+  user-select: none;
+}
+
+.aracode-paste-image__spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid color-mix(in srgb, var(--aracode-primary, #4361ee) 25%, transparent);
+  border-top-color: var(--aracode-primary, #4361ee);
+  border-radius: 50%;
+  animation: aracode-paste-spin 0.75s linear infinite;
+  flex-shrink: 0;
+}
+
+.aracode-paste-image__label {
+  font-size: 0.72rem;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--aracode-muted, #6c757d);
+  max-width: 100%;
+  word-break: break-word;
+}
+
+.aracode-paste-image--error {
+  border-color: #e03131;
+  background: color-mix(in srgb, #ffe3e3 70%, transparent);
+}
+
+.aracode-paste-image--error .aracode-paste-image__label {
+  color: #c92a2a;
+}
+
+@keyframes aracode-paste-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Upload Progress Bar */
 .aracode-dialog-progress {
   height: 6px;
