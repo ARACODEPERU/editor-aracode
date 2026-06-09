@@ -13,7 +13,107 @@ const STRIP_TAGS = new Set([
   'XML', 'W', 'O:P', 'V:SHAPE', 'V:SHAPETYPE', 'V:IMAGEDATA', 'V:TEXTBOX',
 ]);
 
-const MSO_COMMENT_RE = /<!--\[if[\s\S]*?endif\]-->/gi;
+const MSO_COMMENT_RE = /<!--\[if gte mso[\s\S]*?endif\]-->/gi;
+const WORD_VML_BLOCK_RE = /<!--\[if gte vml[\s\S]*?<!\[endif\]-->/gi;
+const WORD_NON_VML_BLOCK_RE = /<!--\[if !vml\]-->([\s\S]*?)<!--\[endif\]-->/gi;
+
+function ptToPx(value, unit) {
+  const n = parseFloat(value);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  if (unit === 'pt') return `${Math.round(n * 1.333)}px`;
+  return `${Math.round(n)}px`;
+}
+
+/**
+ * Word envuelve las imágenes en comentarios condicionales VML.
+ * El fallback real para navegadores está en <!--[if !vml]--><img ...><!--[endif]-->
+ */
+function preprocessWordHtml(html) {
+  if (!html) return '';
+
+  let processed = html;
+
+  // Conservar el contenido del fallback con <img> (navegadores modernos)
+  processed = processed.replace(WORD_NON_VML_BLOCK_RE, (_, inner) => inner);
+
+  // Eliminar bloques VML puro (v:shape) tras extraer dimensiones si hace falta
+  processed = processed.replace(WORD_VML_BLOCK_RE, '');
+
+  // Comentarios MSO restantes (excepto listas, tratadas aparte)
+  processed = processed.replace(MSO_COMMENT_RE, '');
+  processed = processed.replace(/<\/?\?xml[^>]*>/gi, '');
+  processed = processed.replace(/<!\[if !supportLists\][\s\S]*?<!\[endif\]>/gi, '');
+  processed = processed.replace(/<!\[if !supportLineBreakNewLine\][\s\S]*?<!\[endif\]>/gi, '');
+
+  return processed;
+}
+
+function extractVmlImageHints(html) {
+  const hints = [];
+  let match;
+
+  const blockRegex = /<!--\[if gte vml 1\]>([\s\S]*?)<!\[endif\]-->/gi;
+  while ((match = blockRegex.exec(html)) !== null) {
+    const block = match[1];
+    const shapeMatch = block.match(/<v:shape[^>]*style="([^"]*)"[^>]*>/i);
+    const style = shapeMatch?.[1] || '';
+    const sizeMatch = style.match(/width:\s*([0-9.]+)(pt|px)[^;]*;\s*height:\s*([0-9.]+)(pt|px)/i)
+      || style.match(/width:\s*([0-9.]+)(pt|px)/i);
+
+    hints.push({
+      width: sizeMatch ? ptToPx(sizeMatch[1], sizeMatch[2]) : null,
+      height: sizeMatch && sizeMatch[3] ? ptToPx(sizeMatch[3], sizeMatch[4] || sizeMatch[2]) : null,
+    });
+  }
+
+  return hints;
+}
+
+function injectOrphanImages(fragment, editor, imageFiles, startIndex, vmlHints = []) {
+  const locale = editor.options.locale;
+  const loadingLabel = t('pasteImageUploading', locale);
+  const timestamp = Date.now();
+  const uploadTasks = [];
+  const doc = editor.editable.ownerDocument;
+
+  for (let i = startIndex; i < imageFiles.length; i += 1) {
+    const file = imageFiles[i];
+    const hint = vmlHints[i - startIndex] || {};
+    const dimensions = {
+      width: hint.width || '150px',
+      height: hint.height || '200px',
+      display: 'inline-block',
+    };
+
+    const placeholder = createLoadingPlaceholder(editor, createPasteId(), dimensions, loadingLabel);
+    placeholder.style.float = 'right';
+    placeholder.style.margin = '0 0 12px 12px';
+
+    const wrapper = doc.createElement('div');
+    wrapper.style.overflow = 'hidden';
+    wrapper.appendChild(placeholder);
+    if (fragment.firstChild) {
+      fragment.insertBefore(wrapper, fragment.firstChild);
+    } else {
+      fragment.appendChild(wrapper);
+    }
+
+    uploadTasks.push({
+      placeholder,
+      file,
+      meta: {
+        alt: '',
+        widthAttr: '',
+        heightAttr: '',
+        style: `width:${dimensions.width};height:auto;float:right;margin:0 0 12px 12px;`,
+        className: '',
+        dimensions,
+      },
+    });
+  }
+
+  return uploadTasks;
+}
 
 function createPasteId() {
   return `paste-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -108,11 +208,7 @@ function getImageDimensions(img) {
 }
 
 function cleanOfficeHtml(html) {
-  if (!html) return '';
-  let cleaned = html.replace(MSO_COMMENT_RE, '');
-  cleaned = cleaned.replace(/<\/?\?xml[^>]*>/gi, '');
-  cleaned = cleaned.replace(/<!\[if !supportLists\][\s\S]*?<!\[endif\]>/gi, '');
-  return cleaned;
+  return preprocessWordHtml(html);
 }
 
 function sanitizeNode(node, doc) {
@@ -141,6 +237,7 @@ function sanitizeNode(node, doc) {
     if (node.getAttribute('height')) clone.setAttribute('height', node.getAttribute('height'));
     if (node.getAttribute('style')) clone.setAttribute('style', node.getAttribute('style'));
     if (node.className) clone.className = node.className;
+    // Word suele poner src file:// — conservar el nodo para emparejar con el blob del portapapeles
     return clone;
   }
 
@@ -224,6 +321,7 @@ function resolveImageFile(img, imageFiles, indexRef, timestamp) {
     return file;
   }
 
+  // file://, cid:, rutas relativas de Word → usar blob del portapapeles
   if (imageFiles[indexRef.value]) {
     const file = imageFiles[indexRef.value];
     indexRef.value += 1;
@@ -348,13 +446,12 @@ async function uploadPastedImage(editor, file, placeholder, meta) {
   }
 }
 
-function prepareFragmentForPaste(editor, fragment, imageFiles) {
+function prepareFragmentForPaste(editor, fragment, imageFiles, vmlHints = []) {
   const locale = editor.options.locale;
   const loadingLabel = t('pasteImageUploading', locale);
   const timestamp = Date.now();
   const fileIndex = { value: 0 };
   const uploadTasks = [];
-  const doc = editor.editable.ownerDocument;
 
   const images = fragment.querySelectorAll('img');
   images.forEach((img) => {
@@ -376,6 +473,13 @@ function prepareFragmentForPaste(editor, fragment, imageFiles) {
       });
     }
   });
+
+  // Word a veces no incluye <img> en el HTML pero sí PNG en el portapapeles
+  if (fileIndex.value < imageFiles.length) {
+    uploadTasks.push(
+      ...injectOrphanImages(fragment, editor, imageFiles, fileIndex.value, vmlHints)
+    );
+  }
 
   return { fragment, uploadTasks };
 }
@@ -416,25 +520,40 @@ function pasteImageOnly(editor, file, range) {
 }
 
 async function handlePaste(editor, clipboardData) {
-  const html = clipboardData.getData('text/html');
+  const rawHtml = clipboardData.getData('text/html');
   const imageFiles = getClipboardImageFiles(clipboardData);
+  const vmlHints = extractVmlImageHints(rawHtml || '');
   const selection = window.getSelection();
 
   if (!selection.rangeCount) return;
   const range = selection.getRangeAt(0);
   if (!editor.editable.contains(range.commonAncestorContainer)) return;
 
-  if (!html && imageFiles.length === 1) {
-    await pasteImageOnly(editor, imageFiles[0], range.cloneRange());
+  if (!rawHtml && imageFiles.length >= 1) {
+    if (imageFiles.length === 1) {
+      await pasteImageOnly(editor, imageFiles[0], range.cloneRange());
+    } else {
+      const doc = editor.editable.ownerDocument;
+      const fragment = doc.createDocumentFragment();
+      const { uploadTasks } = prepareFragmentForPaste(editor, fragment, imageFiles, vmlHints);
+      insertFragmentAtRange(range, fragment);
+      if (uploadTasks.length) {
+        await Promise.all(
+          uploadTasks.map(({ placeholder, file, meta }) =>
+            uploadPastedImage(editor, file, placeholder, meta)
+          )
+        );
+      }
+    }
     editor.emit('change', editor.getHTML());
     return;
   }
 
-  if (!html) return;
+  if (!rawHtml) return;
 
   const doc = editor.editable.ownerDocument;
-  const fragment = htmlToFragment(html, doc);
-  const { uploadTasks } = prepareFragmentForPaste(editor, fragment, imageFiles);
+  const fragment = htmlToFragment(rawHtml, doc);
+  const { uploadTasks } = prepareFragmentForPaste(editor, fragment, imageFiles, vmlHints);
 
   insertFragmentAtRange(range, fragment);
 
