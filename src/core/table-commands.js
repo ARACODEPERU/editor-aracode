@@ -4,6 +4,12 @@ function createCell(tagName = 'td') {
   return cell;
 }
 
+function cellTagForRow(row, columnIndex) {
+  const ref = row.cells[columnIndex];
+  if (ref) return ref.tagName.toLowerCase() === 'th' ? 'th' : 'td';
+  return row.parentElement?.tagName === 'THEAD' ? 'th' : 'td';
+}
+
 function getTableBody(table) {
   return table.querySelector('tbody') || table;
 }
@@ -31,7 +37,7 @@ export function insertRowAbove(cell, editor) {
   const newRow = document.createElement('tr');
   const colCount = row.cells.length || 1;
   for (let i = 0; i < colCount; i++) {
-    newRow.appendChild(createCell('td'));
+    newRow.appendChild(createCell(cellTagForRow(row, i)));
   }
   row.parentNode.insertBefore(newRow, row);
   editor.emit('change', editor.getHTML());
@@ -48,7 +54,7 @@ export function insertRowBelow(cell, editor) {
   const newRow = document.createElement('tr');
   const colCount = row.cells.length || 1;
   for (let i = 0; i < colCount; i++) {
-    newRow.appendChild(createCell('td'));
+    newRow.appendChild(createCell(cellTagForRow(row, i)));
   }
   row.parentNode.insertBefore(newRow, row.nextSibling);
   editor.emit('change', editor.getHTML());

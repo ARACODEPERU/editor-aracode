@@ -15,3 +15,10 @@ if (fs.existsSync(oldMap)) {
   fs.renameSync(oldMap, newMap);
   console.log('Renamed: style.css.map → aracode-editor.css.map');
 }
+
+const darkSrc = path.join(__dirname, '..', 'src', 'styles', 'themes', 'dark.css');
+const darkDest = path.join(dist, 'theme-dark.css');
+if (fs.existsSync(darkSrc)) {
+  fs.copyFileSync(darkSrc, darkDest);
+  console.log('Copied: src/styles/themes/dark.css → dist/theme-dark.css');
+}

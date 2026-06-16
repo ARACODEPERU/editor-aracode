@@ -27,6 +27,7 @@
       "default": "./dist/aracode-editor.es.js"
     },
     "./style.css": "./dist/aracode-editor.css",
+    "./theme-dark.css": "./dist/theme-dark.css",
     "./dist/aracode-editor.css": "./dist/aracode-editor.css",
     "./dist/*": "./dist/*"
   },

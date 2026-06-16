@@ -1,0 +1,43 @@
+.aracode-theme-dark {
+  --aracode-toolbar-bg: #1e1e2e;
+  --aracode-toolbar-border: #313244;
+  --aracode-editable-bg: #181825;
+  --aracode-editable-border: #313244;
+  --aracode-editable-color: #cdd6f4;
+  --aracode-btn-bg: transparent;
+  --aracode-btn-hover-bg: #313244;
+  --aracode-btn-active-bg: #45475a;
+  --aracode-btn-active-color: #89b4fa;
+  --aracode-btn-color: #a6adc8;
+  --aracode-select-bg: #313244;
+  --aracode-select-border: #45475a;
+  --aracode-placeholder-color: #6c7086;
+  --aracode-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --aracode-overlay-bg: rgba(0, 0, 0, 0.6);
+  --aracode-dialog-bg: #1e1e2e;
+  --aracode-dialog-color: #cdd6f4;
+  --aracode-primary: #89b4fa;
+  --aracode-primary-hover: #74c7ec;
+  --aracode-primary-color: #1e1e2e;
+  --aracode-secondary-bg: #313244;
+  --aracode-secondary-border: #45475a;
+  --aracode-secondary-color: #cdd6f4;
+}
+
+.aracode-theme-dark .aracode-editable blockquote {
+  background: #313244;
+  color: #a6adc8;
+}
+
+.aracode-theme-dark .aracode-editable code {
+  background: #313244;
+  color: #f38ba8;
+}
+
+.aracode-theme-dark .aracode-editable h6 {
+  color: #6c7086;
+}
+
+.aracode-theme-dark .aracode-editable hr {
+  border-top-color: #313244;
+}

@@ -589,7 +589,7 @@
 
 .aracode-table-context-menu {
   position: fixed;
-  z-index: 10060;
+  z-index: 100010;
   min-width: 220px;
   padding: 4px 0;
   background: #ffffff;
@@ -1059,7 +1059,7 @@
 .aracode-color-picker {
   display: none;
   position: fixed;
-  z-index: 10050;
+  z-index: 100010;
   padding: 8px;
   background: #ffffff;
   border: 1px solid var(--aracode-toolbar-border);

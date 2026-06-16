@@ -229,7 +229,7 @@ function sanitizeNode(node, doc) {
   if (tag === 'IMG') {
     const clone = doc.createElement('img');
     const src = node.getAttribute('src') || '';
-    if (src && !/^javascript:/i.test(src)) {
+    if (src && !/^javascript:/i.test(src) && !/^file:/i.test(src) && !/^cid:/i.test(src)) {
       clone.setAttribute('src', src);
     }
     if (node.getAttribute('alt')) clone.setAttribute('alt', node.getAttribute('alt'));

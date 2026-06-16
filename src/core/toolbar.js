@@ -343,6 +343,7 @@ export class Toolbar {
     };
 
     search.addEventListener('input', render);
+    preventFocusLoss(search, this.editor);
     popover.appendChild(search);
     popover.appendChild(list);
     wrapper.appendChild(popover);

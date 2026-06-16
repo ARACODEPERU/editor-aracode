@@ -346,6 +346,11 @@ export class AracodeEditor {
   width: 100%;
   border-collapse: collapse;
   margin: 1em 0;
+  page-break-inside: auto;
+}
+.aracode-export-content tr {
+  page-break-inside: avoid;
+  page-break-after: auto;
 }
 .aracode-export-content th,
 .aracode-export-content td {
@@ -532,7 +537,7 @@ export class AracodeEditor {
       if (dialog) dialog.updateProgress(10);
       const result = await this.options.imageUploadHandler(file);
       if (dialog) dialog.updateProgress(100);
-      return result;
+      return typeof result === 'string' ? result : this._extractUploadUrl(result);
     }
 
     if (!this.options.imageUploadUrl) {
@@ -543,29 +548,51 @@ export class AracodeEditor {
     formData.append(this.options.imageUploadFieldName || 'image', file);
     if (targetUrl) formData.append('target_url', targetUrl);
 
-    // Append additional params from options
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
     if (this.options.imageUploadParams) {
       for (const [key, value] of Object.entries(this.options.imageUploadParams)) {
         formData.append(key, value);
       }
     }
+    if (csrfToken) {
+      formData.set('_token', csrfToken);
+    }
+
+    const headers = { ...(this.options.imageUploadHeaders || {}) };
+    if (csrfToken) {
+      headers['X-CSRF-TOKEN'] = csrfToken;
+    }
 
     if (dialog) dialog.updateProgress(20);
     const response = await fetch(this.options.imageUploadUrl, {
       method: 'POST',
-      headers: {
-        ...(this.options.imageUploadHeaders || {}),
-      },
+      headers,
       body: formData,
+      credentials: 'same-origin',
     });
 
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      throw new Error(data.error || t('imageUploadError', this.options.locale));
+      throw new Error(data.error || data.message || t('imageUploadError', this.options.locale));
     }
 
     if (dialog) dialog.updateProgress(100);
-    return data.url || data.path || data.location || null;
+    return this._extractUploadUrl(data);
+  }
+
+  _extractUploadUrl(data) {
+    if (!data) return null;
+    if (typeof data === 'string') return data;
+    if (data.url) return data.url;
+    if (data.path) return data.path;
+    if (data.location) return data.location;
+    if (data.secure_url) return data.secure_url;
+    if (data.data) {
+      if (typeof data.data === 'string') return data.data;
+      if (data.data.url) return data.data.url;
+      if (data.data.path) return data.data.path;
+    }
+    return null;
   }
 
   _trackUploadedImage(url, file) {
@@ -742,12 +769,15 @@ export class AracodeEditor {
         item.type = 'button';
         item.className = 'aracode-search-result';
         item.innerHTML = `<span>Línea ${match.line}</span><strong>${this._escapeHTML(match.preview)}</strong>`;
+        item.addEventListener('mousedown', (e) => e.preventDefault());
         item.addEventListener('click', () => this._selectSearchMatch(match));
         results.appendChild(item);
       });
     };
 
     input.addEventListener('input', render);
+    input.addEventListener('mousedown', (e) => e.preventDefault());
+    closeBtn.addEventListener('mousedown', (e) => e.preventDefault());
     closeBtn.addEventListener('click', () => this.toggleSearchPanel());
     setTimeout(() => input.focus(), 0);
   }
