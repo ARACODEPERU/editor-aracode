@@ -396,7 +396,10 @@ async function enrichPasteImageSources(sources, extraPromises = []) {
   if (!extraPromises.length) return sources;
 
   const extraFileLists = await Promise.all(extraPromises);
-  sources.clipboardFiles = mergeUniqueFiles(sources.clipboardFiles, ...extraFileLists);
+  sources.clipboardFiles = mergeUniqueFiles(
+    sources.clipboardFiles,
+    ...extraFileLists.filter(Array.isArray),
+  );
 
   return sources;
 }
@@ -698,7 +701,40 @@ function captureImageMeta(img) {
   };
 }
 
+function plainTextToFragment(text, doc) {
+  const fragment = doc.createDocumentFragment();
+  const lines = String(text || '').split(/\r?\n/);
+
+  if (!lines.length) {
+    return fragment;
+  }
+
+  lines.forEach((line) => {
+    const block = doc.createElement('p');
+    block.textContent = line;
+    fragment.appendChild(block);
+  });
+
+  return fragment;
+}
+
+function saveEditorRange(editor) {
+  const selection = window.getSelection();
+  if (!selection?.rangeCount) return null;
+
+  const range = selection.getRangeAt(0);
+  if (!editor.editable.contains(range.commonAncestorContainer)) return null;
+
+  return range.cloneRange();
+}
+
 function insertFragmentAtRange(range, fragment) {
+  if (!range) return;
+
+  if (!fragment?.childNodes?.length) {
+    return;
+  }
+
   range.deleteContents();
 
   const lastNode = fragment.lastChild;
@@ -840,21 +876,24 @@ function pasteImageOnly(editor, file, range) {
   });
 }
 
-async function handlePaste(editor, clipboardData, prefetchPromises = []) {
+async function handlePaste(editor, clipboardData, savedRange, prefetchPromises = []) {
   const rawHtml = clipboardData.getData('text/html');
+  const plainText = clipboardData.getData('text/plain');
   let sources = buildPasteImageSources(clipboardData, rawHtml);
-  sources = await enrichPasteImageSources(sources, prefetchPromises);
+
+  if (prefetchPromises.length) {
+    sources = await enrichPasteImageSources(sources, prefetchPromises);
+  }
+
   const clipboardFiles = sources.clipboardFiles;
   const vmlHints = extractVmlImageHints(rawHtml || '');
-  const selection = window.getSelection();
+  const range = savedRange;
 
-  if (!selection.rangeCount) return;
-  const range = selection.getRangeAt(0);
-  if (!editor.editable.contains(range.commonAncestorContainer)) return;
+  if (!range) return;
 
   if (!rawHtml && clipboardFiles.length >= 1) {
     if (clipboardFiles.length === 1) {
-      await pasteImageOnly(editor, clipboardFiles[0], range.cloneRange());
+      await pasteImageOnly(editor, clipboardFiles[0], range);
     } else {
       const doc = editor.editable.ownerDocument;
       const fragment = doc.createDocumentFragment();
@@ -872,10 +911,22 @@ async function handlePaste(editor, clipboardData, prefetchPromises = []) {
     return;
   }
 
-  if (!rawHtml) return;
+  if (!rawHtml) {
+    if (plainText) {
+      const fragment = plainTextToFragment(plainText, editor.editable.ownerDocument);
+      insertFragmentAtRange(range, fragment);
+      editor.emit('change', editor.getHTML());
+    }
+    return;
+  }
 
   const doc = editor.editable.ownerDocument;
-  const fragment = htmlToFragment(rawHtml, doc);
+  let fragment = htmlToFragment(rawHtml, doc);
+
+  if (!fragment.childNodes.length && plainText) {
+    fragment = plainTextToFragment(plainText, doc);
+  }
+
   const { uploadTasks } = await prepareFragmentForPaste(editor, fragment, sources, vmlHints);
 
   insertFragmentAtRange(range, fragment);
@@ -891,6 +942,22 @@ async function handlePaste(editor, clipboardData, prefetchPromises = []) {
   editor.emit('change', editor.getHTML());
 }
 
+function shouldInterceptPaste(html, imageFiles, rtfImages, htmlImages, expectedImages) {
+  if (imageFiles.length > 0 || rtfImages.length > 0 || htmlImages.length > 0) {
+    return true;
+  }
+
+  if (expectedImages > 0) {
+    return true;
+  }
+
+  if (html && hasPasteableRichContent(html, imageFiles)) {
+    return true;
+  }
+
+  return false;
+}
+
 export function bindPasteHandler(editor) {
   editor.editable.addEventListener('paste', (event) => {
     if (!isPasteUploadEnabled(editor)) return;
@@ -899,44 +966,44 @@ export function bindPasteHandler(editor) {
     if (!clipboardData) return;
 
     const html = clipboardData.getData('text/html');
+    const plainText = clipboardData.getData('text/plain');
     const imageFiles = getClipboardImageFiles(clipboardData);
     const rtfImages = extractRtfImages(clipboardData.getData('text/rtf') || '');
     const htmlImages = mergeUniqueFiles(
       extractDataUrlImagesFromHtml(html || ''),
       extractAllDataUrlsFromRawHtml(html || ''),
     );
-    const plainText = clipboardData.getData('text/plain');
     const expectedImages = countPasteImagesInHtml(html || '');
 
-    const shouldHandle =
-      imageFiles.length > 0 ||
-      rtfImages.length > 0 ||
-      htmlImages.length > 0 ||
-      expectedImages > 0 ||
-      (html && hasPasteableRichContent(html, imageFiles));
+    if (!shouldInterceptPaste(html, imageFiles, rtfImages, htmlImages, expectedImages)) {
+      return;
+    }
 
-    if (!shouldHandle) return;
+    if (!html && !imageFiles.length && !rtfImages.length && !expectedImages && plainText) {
+      return;
+    }
 
-    if (!html && !imageFiles.length && !rtfImages.length && !expectedImages && plainText) return;
+    const savedRange = saveEditorRange(editor);
+    if (!savedRange) return;
+
+    event.preventDefault();
 
     const prefetchPromises = [];
     if (navigator.clipboard?.read) {
-      prefetchPromises.push(readClipboardImagesViaApi());
+      prefetchPromises.push(
+        Promise.race([
+          readClipboardImagesViaApi(),
+          new Promise((resolve) => window.setTimeout(() => resolve([]), 300)),
+        ])
+      );
     }
 
-    const initialSources = buildPasteImageSources(clipboardData, html || '');
-    const initialTotal =
-      initialSources.clipboardFiles.length +
-      initialSources.htmlDataFiles.length +
-      initialSources.rtfFiles.length;
-
-    if (expectedImages > initialTotal) {
-      prefetchPromises.push(captureNativePasteImages(clipboardData));
-    }
-
-    event.preventDefault();
-    handlePaste(editor, clipboardData, prefetchPromises).catch((err) => {
+    handlePaste(editor, clipboardData, savedRange, prefetchPromises).catch((err) => {
       console.error('Error al procesar pegado', err);
+
+      const fallback = plainTextToFragment(plainText, editor.editable.ownerDocument);
+      insertFragmentAtRange(savedRange, fallback);
+      editor.emit('change', editor.getHTML());
     });
   });
 }
