@@ -239,6 +239,7 @@
   background: var(--aracode-editable-bg);
   overflow-y: auto;
   word-wrap: break-word;
+  position: relative;
 }
 
 .aracode-editable:empty::before {
@@ -645,6 +646,13 @@
   tab-size: 2;
 }
 
+/* === Drag Over (external file drop) === */
+.aracode-editable.aracode-dragover {
+  outline: 3px dashed var(--aracode-primary);
+  outline-offset: -3px;
+  background: rgba(26, 115, 232, 0.04);
+}
+
 /* === Fullscreen === */
 .aracode-editor-container.is-fullscreen {
   position: fixed;
@@ -983,6 +991,16 @@
   float: none !important;
   height: auto !important;
   margin: 0 !important;
+}
+
+/* Drag & Drop Indicator */
+.aracode-drop-indicator {
+  position: absolute;
+  width: 2px;
+  background: var(--aracode-primary);
+  z-index: 1000;
+  pointer-events: none;
+  border-radius: 1px;
 }
 
 /* Paste image placeholders */

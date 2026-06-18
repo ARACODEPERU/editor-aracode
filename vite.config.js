@@ -13,13 +13,11 @@ export default defineConfig({
     sourcemap: true,
     minify: 'esbuild',
     rollupOptions: {
-      output: {
-        inlineDynamicImports: true,
-      },
+      output: {},
     },
   },
   optimizeDeps: {
-    include: ['html2pdf.js'],
+    include: [],
   },
   server: {
     open: true,

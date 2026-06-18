@@ -10,7 +10,7 @@ const DEFAULT_TOOLS = [
   'blockquote', 'codeBlock', 'code', 'horizontalRule', '|',
   'textColor', 'backgroundColor', '|',
   'undo', 'redo', 'removeFormat', '|',
-  'search', 'exportPdf', 'sourceView', 'fullscreen',
+  'search', 'sourceView', 'fullscreen',
 ];
 
 const HEADING_OPTIONS = [
@@ -50,7 +50,6 @@ const TOOL_ICONS = {
   textColor: '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M11 3L5.5 17h2.25l1.12-3h6.25l1.12 3h2.25L13 3h-2zm-1.38 9L11 5.5 12.38 12H9.62z"/><path fill="currentColor" d="M3 21h18v-2H3v2z"/></svg>',
   backgroundColor: '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M16.56 8.94L7.62 0 6.21 1.41l2.38 2.38-5.15 5.15a1.49 1.49 0 0 0 0 2.12l5.5 5.5a1.5 1.5 0 0 0 2.12 0l5.15-5.15 2.38 2.38 1.41-1.41-2.38-2.38zM5.5 12.56l4.5-4.5 4.5 4.5-4.5 4.5-4.5-4.5z"/><path fill="currentColor" d="M3 21h18v-2H3v2z"/></svg>',
   search: '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M9.5 3a6.5 6.5 0 0 1 5.18 10.43l5.45 5.44-1.42 1.42-5.44-5.45A6.5 6.5 0 1 1 9.5 3zm0 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9z"/></svg>',
-  exportPdf: '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="#c92a2a" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2l5 5h-5V4zM8 12h2v6H8v-6zm4-3h2v9h-2V9zm4 2h2v7h-2v-7z"/></svg>',
 };
 
 const OPEN_FONTS = [
@@ -94,7 +93,6 @@ const TOOL_COMMAND_STATE = {
   search: false,
   sourceView: false,
   fullscreen: false,
-  exportPdf: false,
   table: false,
 };
 
@@ -264,34 +262,8 @@ export class Toolbar {
       case 'unlink': cmds.removeLink(); break;
       case 'image': this.editor.openImageDialog(); break;
       case 'search': this.editor.toggleSearchPanel(); break;
-      case 'exportPdf': this.handleExportPdf(); break;
       case 'sourceView': this.editor.toggleSourceView(); break;
       case 'fullscreen': this.editor.toggleFullscreen(); break;
-    }
-  }
-
-  async handleExportPdf() {
-    const btn = this.buttons.exportPdf;
-    const locale = this.editor.options.locale;
-    if (btn) {
-      btn.disabled = true;
-      btn.classList.add('is-loading');
-    }
-    try {
-      const result = await this.editor.exportToPDF({
-        filename: t('exportPdfFilename', locale),
-        mode: 'download',
-      });
-      if (result.mode === 'print') {
-        alert(t('exportPdfPrintHint', locale));
-      }
-    } catch (err) {
-      alert(err.message || t('exportPdfError', locale));
-    } finally {
-      if (btn) {
-        btn.disabled = false;
-        btn.classList.remove('is-loading');
-      }
     }
   }
 

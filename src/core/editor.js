@@ -6,8 +6,7 @@ import { ColorPicker } from '../ui/color-picker.js';
 import { ImageController } from '../ui/image-controller.js';
 import { TableController } from '../ui/table-controller.js';
 import { handleBlockExitKeydown } from './block-exit.js';
-import { printEditorAsPdf, downloadEditorAsPdf } from './pdf-export.js';
-import { bindPasteHandler } from './paste-handler.js';
+import { bindPasteHandler, pasteImageOnly, isPasteUploadEnabled } from './paste-handler.js';
 
 const DEFAULT_OPTIONS = {
   height: 400,
@@ -151,6 +150,32 @@ export class AracodeEditor {
     });
 
     bindPasteHandler(this);
+
+    this.editable.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+      this.editable.classList.add('aracode-dragover');
+    });
+
+    this.editable.addEventListener('dragleave', () => {
+      this.editable.classList.remove('aracode-dragover');
+    });
+
+    this.editable.addEventListener('drop', async (e) => {
+      this.editable.classList.remove('aracode-dragover');
+      if (!isPasteUploadEnabled(this)) return;
+      const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+      if (!files.length) return;
+      e.preventDefault();
+      const range = document.caretRangeFromPoint(e.clientX, e.clientY);
+      if (!range || !this.editable.contains(range.commonAncestorContainer)) return;
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      for (const file of files) {
+        await pasteImageOnly(this, file, range);
+      }
+    });
   }
 
   on(event, handler) {
@@ -188,49 +213,6 @@ export class AracodeEditor {
       `<div class="aracode-export-content">${content}</div>`,
       '</div>',
     ].join('');
-  }
-
-  /**
-   * Exporta el contenido del editor a PDF.
-   * @param {Object} options
-   * @param {string} [options.filename='documento-aracode.pdf']
-   * @param {string} [options.title='Documento']
-   * @param {'download'|'print'|'auto'} [options.mode='auto'] - auto intenta descarga y usa impresión si falla
-   */
-  async exportToPDF(options = {}) {
-    const {
-      filename = 'documento-aracode.pdf',
-      title = t('exportPdfTitle', this.options.locale),
-      mode = 'auto',
-    } = options;
-
-    if (!this.getText().trim()) {
-      throw new Error(t('exportPdfEmpty', this.options.locale));
-    }
-
-    const html = this.getExportHTML();
-
-    if (mode === 'print') {
-      printEditorAsPdf(html, title);
-      this.emit('exportPdf', { mode: 'print', filename });
-      return { mode: 'print' };
-    }
-
-    if (mode === 'download') {
-      await downloadEditorAsPdf(html, filename);
-      this.emit('exportPdf', { mode: 'download', filename });
-      return { mode: 'download', filename };
-    }
-
-    try {
-      await downloadEditorAsPdf(html, filename);
-      this.emit('exportPdf', { mode: 'download', filename });
-      return { mode: 'download', filename };
-    } catch {
-      printEditorAsPdf(html, title);
-      this.emit('exportPdf', { mode: 'print', filename });
-      return { mode: 'print' };
-    }
   }
 
   _getExportFontImports(content) {

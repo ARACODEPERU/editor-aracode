@@ -118,7 +118,7 @@ function createPasteId() {
   return `paste-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
-function isPasteUploadEnabled(editor) {
+export function isPasteUploadEnabled(editor) {
   if (editor.options.readOnly) return false;
   if (editor.options.pasteImageUpload === false) return false;
   if (editor.options.pasteImageUpload === true) {
@@ -802,7 +802,7 @@ function hasPasteableRichContent(html, imageFiles) {
   return /<(img|table|p|div|span|ul|ol|li|h[1-6]|strong|em|br)\b/i.test(html);
 }
 
-function pasteImageOnly(editor, file, range) {
+export function pasteImageOnly(editor, file, range) {
   const locale = editor.options.locale;
   const dimensions = { width: '120px', height: '80px', display: 'inline-block' };
   const placeholder = createLoadingPlaceholder(
