@@ -122,6 +122,21 @@ function isPasteUploadEnabled(editor) {
   return Boolean(editor.options.imageUploadUrl || editor.options.imageUploadHandler);
 }
 
+function mergeUniqueFiles(...lists) {
+  const files = [];
+  const seen = new Set();
+
+  lists.flat().forEach((file) => {
+    if (!file || !file.type?.startsWith('image/')) return;
+    const key = `${file.name}|${file.size}|${file.type}|${file.lastModified}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    files.push(file);
+  });
+
+  return files;
+}
+
 function getClipboardImageFiles(clipboardData) {
   if (!clipboardData) return [];
 
@@ -144,13 +159,142 @@ function getClipboardImageFiles(clipboardData) {
 
   if (clipboardData.items?.length) {
     for (const item of clipboardData.items) {
-      if (item.kind === 'file' && item.type.startsWith('image/')) {
+      if (item.type?.startsWith('image/')) {
         pushFile(item.getAsFile());
       }
     }
   }
 
   return files;
+}
+
+async function readClipboardImagesViaApi() {
+  if (!navigator.clipboard?.read) return [];
+
+  try {
+    const items = await navigator.clipboard.read();
+    const files = [];
+
+    for (const item of items) {
+      for (const type of item.types) {
+        if (!type.startsWith('image/')) continue;
+        const blob = await item.getType(type);
+        const ext = extensionFromMime(blob.type || type);
+        files.push(new File([blob], `clipboard-api-${files.length}.${ext}`, {
+          type: blob.type || type,
+        }));
+      }
+    }
+
+    return files;
+  } catch {
+    return [];
+  }
+}
+
+function captureNativePasteImages(sourceClipboardData = null) {
+  return new Promise((resolve) => {
+    const temp = document.createElement('div');
+    temp.setAttribute('contenteditable', 'true');
+    temp.setAttribute('aria-hidden', 'true');
+    temp.style.cssText = [
+      'position:fixed',
+      'left:-9999px',
+      'top:0',
+      'width:1px',
+      'height:1px',
+      'overflow:hidden',
+      'opacity:0',
+      'pointer-events:none',
+    ].join(';');
+    document.body.appendChild(temp);
+
+    let settled = false;
+    const finish = async () => {
+      if (settled) return;
+      settled = true;
+
+      const files = [];
+      for (const img of temp.querySelectorAll('img')) {
+        const src = img.currentSrc || img.getAttribute('src') || '';
+        if (src.startsWith('data:image/')) {
+          const mime = src.match(/^data:([^;,]+)/)?.[1] || 'image/png';
+          const file = dataUrlToFile(src, `native-${files.length}.${extensionFromMime(mime)}`);
+          if (file) files.push(file);
+        } else if (src.startsWith('blob:')) {
+          const file = await blobUrlToFile(src, `native-${files.length}.png`);
+          if (file) files.push(file);
+        }
+      }
+
+      temp.remove();
+      resolve(files);
+    };
+
+    temp.addEventListener('paste', () => {
+      window.setTimeout(finish, 30);
+    }, { once: true });
+
+    temp.focus();
+
+    if (sourceClipboardData) {
+      try {
+        const pasteEvt = new ClipboardEvent('paste', {
+          clipboardData: sourceClipboardData,
+          bubbles: true,
+          cancelable: true,
+        });
+        temp.dispatchEvent(pasteEvt);
+        window.setTimeout(finish, 250);
+        return;
+      } catch {
+        // continuar con execCommand
+      }
+    }
+
+    try {
+      const pasted = document.execCommand('paste');
+      if (!pasted) {
+        finish();
+        return;
+      }
+    } catch {
+      finish();
+      return;
+    }
+
+    window.setTimeout(finish, 200);
+  });
+}
+
+function extractAllDataUrlsFromRawHtml(html) {
+  if (!html) return [];
+
+  const files = [];
+  const regex = /data:image\/(?:png|jpe?g|gif|webp|svg\+xml);base64,[A-Za-z0-9+/=\s]+/gi;
+  let match;
+
+  while ((match = regex.exec(html)) !== null) {
+    const dataUrl = match[0].replace(/\s+/g, '');
+    const mime = dataUrl.match(/^data:([^;,]+)/)?.[1] || 'image/png';
+    const file = dataUrlToFile(dataUrl, `raw-${files.length}.${extensionFromMime(mime)}`);
+    if (file) files.push(file);
+  }
+
+  return files;
+}
+
+function countPasteImagesInHtml(html) {
+  if (!html) return 0;
+
+  const processed = preprocessWordHtml(html);
+  const doc = new DOMParser().parseFromString(processed, 'text/html');
+  let count = doc.querySelectorAll('img').length;
+
+  const vmlBlocks = html.match(/<!--\[if gte vml 1\][\s\S]*?<!\[endif\]-->/gi) || [];
+  count = Math.max(count, vmlBlocks.length);
+
+  return count;
 }
 
 function extractDataUrlImagesFromHtml(html) {
@@ -183,12 +327,41 @@ function extractRtfImages(rtf) {
   if (!rtf) return [];
 
   const files = [];
-  const blipRegex = /\\(pngblip|jpegblip)\s*([\da-fA-F\s\r\n]+)/g;
+  const blipRegex = /\\(pngblip|jpegblip)/gi;
   let match;
 
   while ((match = blipRegex.exec(rtf)) !== null) {
-    const mime = match[1] === 'jpegblip' ? 'image/jpeg' : 'image/png';
-    const hex = match[2].replace(/[^0-9a-fA-F]/g, '');
+    const mime = match[1].toLowerCase() === 'jpegblip' ? 'image/jpeg' : 'image/png';
+    let pos = match.index + match[0].length;
+
+    while (pos < rtf.length) {
+      if (rtf[pos] === '\\') {
+        const control = rtf.slice(pos).match(/^\\([a-zA-Z]+)(-?\d+)?\s?/);
+        if (control) {
+          pos += control[0].length;
+          continue;
+        }
+      }
+      if (rtf[pos] === '{' || rtf[pos] === '}' || /\s/.test(rtf[pos])) {
+        pos += 1;
+        continue;
+      }
+      break;
+    }
+
+    let hex = '';
+    while (pos < rtf.length) {
+      const ch = rtf[pos];
+      if (/[0-9a-fA-F]/.test(ch)) {
+        hex += ch;
+        pos += 1;
+      } else if (/\s/.test(ch)) {
+        pos += 1;
+      } else {
+        break;
+      }
+    }
+
     if (hex.length < 40 || hex.length % 2 !== 0) continue;
 
     try {
@@ -207,11 +380,25 @@ function extractRtfImages(rtf) {
 }
 
 function buildPasteImageSources(clipboardData, rawHtml) {
+  const html = rawHtml || '';
+
   return {
     clipboardFiles: getClipboardImageFiles(clipboardData),
-    htmlDataFiles: extractDataUrlImagesFromHtml(rawHtml || ''),
+    htmlDataFiles: mergeUniqueFiles(
+      extractDataUrlImagesFromHtml(html),
+      extractAllDataUrlsFromRawHtml(html),
+    ),
     rtfFiles: extractRtfImages(clipboardData?.getData('text/rtf') || ''),
   };
+}
+
+async function enrichPasteImageSources(sources, extraPromises = []) {
+  if (!extraPromises.length) return sources;
+
+  const extraFileLists = await Promise.all(extraPromises);
+  sources.clipboardFiles = mergeUniqueFiles(sources.clipboardFiles, ...extraFileLists);
+
+  return sources;
 }
 
 function imageNeedsUpload(img) {
@@ -653,9 +840,10 @@ function pasteImageOnly(editor, file, range) {
   });
 }
 
-async function handlePaste(editor, clipboardData) {
+async function handlePaste(editor, clipboardData, prefetchPromises = []) {
   const rawHtml = clipboardData.getData('text/html');
-  const sources = buildPasteImageSources(clipboardData, rawHtml);
+  let sources = buildPasteImageSources(clipboardData, rawHtml);
+  sources = await enrichPasteImageSources(sources, prefetchPromises);
   const clipboardFiles = sources.clipboardFiles;
   const vmlHints = extractVmlImageHints(rawHtml || '');
   const selection = window.getSelection();
@@ -713,21 +901,41 @@ export function bindPasteHandler(editor) {
     const html = clipboardData.getData('text/html');
     const imageFiles = getClipboardImageFiles(clipboardData);
     const rtfImages = extractRtfImages(clipboardData.getData('text/rtf') || '');
-    const htmlImages = extractDataUrlImagesFromHtml(html || '');
+    const htmlImages = mergeUniqueFiles(
+      extractDataUrlImagesFromHtml(html || ''),
+      extractAllDataUrlsFromRawHtml(html || ''),
+    );
     const plainText = clipboardData.getData('text/plain');
+    const expectedImages = countPasteImagesInHtml(html || '');
 
     const shouldHandle =
       imageFiles.length > 0 ||
       rtfImages.length > 0 ||
       htmlImages.length > 0 ||
+      expectedImages > 0 ||
       (html && hasPasteableRichContent(html, imageFiles));
 
     if (!shouldHandle) return;
 
-    if (!html && !imageFiles.length && !rtfImages.length && plainText) return;
+    if (!html && !imageFiles.length && !rtfImages.length && !expectedImages && plainText) return;
+
+    const prefetchPromises = [];
+    if (navigator.clipboard?.read) {
+      prefetchPromises.push(readClipboardImagesViaApi());
+    }
+
+    const initialSources = buildPasteImageSources(clipboardData, html || '');
+    const initialTotal =
+      initialSources.clipboardFiles.length +
+      initialSources.htmlDataFiles.length +
+      initialSources.rtfFiles.length;
+
+    if (expectedImages > initialTotal) {
+      prefetchPromises.push(captureNativePasteImages(clipboardData));
+    }
 
     event.preventDefault();
-    handlePaste(editor, clipboardData).catch((err) => {
+    handlePaste(editor, clipboardData, prefetchPromises).catch((err) => {
       console.error('Error al procesar pegado', err);
     });
   });
