@@ -1,4 +1,9 @@
 import { t } from '../lang.js';
+import {
+  applyRtfImagesToDocument,
+  readRtfFromClipboard,
+  rtfImagesToFiles,
+} from './office-paste-images.js';
 
 const ALLOWED_TAGS = new Set([
   'P', 'BR', 'DIV', 'SPAN', 'STRONG', 'B', 'EM', 'I', 'U', 'S', 'STRIKE', 'DEL',
@@ -323,64 +328,9 @@ function extractDataUrlImagesFromHtml(html) {
   return files;
 }
 
-function extractRtfImages(rtf) {
-  if (!rtf) return [];
-
-  const files = [];
-  const blipRegex = /\\(pngblip|jpegblip)/gi;
-  let match;
-
-  while ((match = blipRegex.exec(rtf)) !== null) {
-    const mime = match[1].toLowerCase() === 'jpegblip' ? 'image/jpeg' : 'image/png';
-    let pos = match.index + match[0].length;
-
-    while (pos < rtf.length) {
-      if (rtf[pos] === '\\') {
-        const control = rtf.slice(pos).match(/^\\([a-zA-Z]+)(-?\d+)?\s?/);
-        if (control) {
-          pos += control[0].length;
-          continue;
-        }
-      }
-      if (rtf[pos] === '{' || rtf[pos] === '}' || /\s/.test(rtf[pos])) {
-        pos += 1;
-        continue;
-      }
-      break;
-    }
-
-    let hex = '';
-    while (pos < rtf.length) {
-      const ch = rtf[pos];
-      if (/[0-9a-fA-F]/.test(ch)) {
-        hex += ch;
-        pos += 1;
-      } else if (/\s/.test(ch)) {
-        pos += 1;
-      } else {
-        break;
-      }
-    }
-
-    if (hex.length < 40 || hex.length % 2 !== 0) continue;
-
-    try {
-      const bytes = new Uint8Array(hex.length / 2);
-      for (let i = 0; i < hex.length; i += 2) {
-        bytes[i / 2] = parseInt(hex.slice(i, i + 2), 16);
-      }
-      const ext = mime === 'image/jpeg' ? 'jpg' : 'png';
-      files.push(new File([bytes], `rtf-${files.length}.${ext}`, { type: mime }));
-    } catch {
-      // ignorar bloques corruptos
-    }
-  }
-
-  return files;
-}
-
-function buildPasteImageSources(clipboardData, rawHtml) {
+function buildPasteImageSources(clipboardData, rawHtml, rtfData = '') {
   const html = rawHtml || '';
+  const rtf = rtfData || clipboardData?.getData('text/rtf') || clipboardData?.getData('application/rtf') || '';
 
   return {
     clipboardFiles: getClipboardImageFiles(clipboardData),
@@ -388,7 +338,7 @@ function buildPasteImageSources(clipboardData, rawHtml) {
       extractDataUrlImagesFromHtml(html),
       extractAllDataUrlsFromRawHtml(html),
     ),
-    rtfFiles: extractRtfImages(clipboardData?.getData('text/rtf') || ''),
+    rtfFiles: rtfImagesToFiles(rtf),
   };
 }
 
@@ -583,9 +533,14 @@ function sanitizeNode(node, doc) {
   return clone;
 }
 
-function htmlToFragment(html, doc) {
+function htmlToFragment(html, doc, rtfData = '') {
   const cleaned = cleanOfficeHtml(html);
   const parsed = new DOMParser().parseFromString(cleaned, 'text/html');
+
+  if (rtfData) {
+    applyRtfImagesToDocument(parsed, rtfData);
+  }
+
   const fragment = doc.createDocumentFragment();
 
   const bodyChildren = parsed.body?.childNodes || [];
@@ -879,7 +834,9 @@ function pasteImageOnly(editor, file, range) {
 async function handlePaste(editor, clipboardData, savedRange, prefetchPromises = []) {
   const rawHtml = clipboardData.getData('text/html');
   const plainText = clipboardData.getData('text/plain');
-  let sources = buildPasteImageSources(clipboardData, rawHtml);
+  const rtfData = await readRtfFromClipboard(clipboardData);
+
+  let sources = buildPasteImageSources(clipboardData, rawHtml, rtfData);
 
   if (prefetchPromises.length) {
     sources = await enrichPasteImageSources(sources, prefetchPromises);
@@ -921,7 +878,7 @@ async function handlePaste(editor, clipboardData, savedRange, prefetchPromises =
   }
 
   const doc = editor.editable.ownerDocument;
-  let fragment = htmlToFragment(rawHtml, doc);
+  let fragment = htmlToFragment(rawHtml, doc, rtfData);
 
   if (!fragment.childNodes.length && plainText) {
     fragment = plainTextToFragment(plainText, doc);
@@ -968,7 +925,9 @@ export function bindPasteHandler(editor) {
     const html = clipboardData.getData('text/html');
     const plainText = clipboardData.getData('text/plain');
     const imageFiles = getClipboardImageFiles(clipboardData);
-    const rtfImages = extractRtfImages(clipboardData.getData('text/rtf') || '');
+    const rtfImages = rtfImagesToFiles(
+      clipboardData.getData('text/rtf') || clipboardData.getData('application/rtf') || '',
+    );
     const htmlImages = mergeUniqueFiles(
       extractDataUrlImagesFromHtml(html || ''),
       extractAllDataUrlsFromRawHtml(html || ''),
