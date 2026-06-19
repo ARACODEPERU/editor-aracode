@@ -2313,10 +2313,9 @@ class vt {
     }), this.editable.addEventListener("dragleave", () => {
       this.editable.classList.remove("aracode-dragover");
     }), this.editable.addEventListener("drop", async (e) => {
-      if (this.editable.classList.remove("aracode-dragover"), !se(this)) return;
+      if (e.preventDefault(), this.editable.classList.remove("aracode-dragover"), !se(this)) return;
       const t = Array.from(e.dataTransfer.files).filter((o) => o.type.startsWith("image/"));
       if (!t.length) return;
-      e.preventDefault();
       const n = document.caretRangeFromPoint(e.clientX, e.clientY);
       if (!n || !this.editable.contains(n.commonAncestorContainer)) return;
       const a = window.getSelection();

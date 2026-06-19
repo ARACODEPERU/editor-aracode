@@ -162,11 +162,11 @@ export class AracodeEditor {
     });
 
     this.editable.addEventListener('drop', async (e) => {
+      e.preventDefault();
       this.editable.classList.remove('aracode-dragover');
       if (!isPasteUploadEnabled(this)) return;
       const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
       if (!files.length) return;
-      e.preventDefault();
       const range = document.caretRangeFromPoint(e.clientX, e.clientY);
       if (!range || !this.editable.contains(range.commonAncestorContainer)) return;
       const selection = window.getSelection();
