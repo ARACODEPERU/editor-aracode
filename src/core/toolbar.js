@@ -157,7 +157,9 @@ export class Toolbar {
           option.textContent = opt.label;
           select.appendChild(option);
         });
-        preventFocusLoss(select, this.editor);
+        select.addEventListener('mousedown', () => {
+          this.editor.saveToolbarSelection();
+        });
         select.addEventListener('change', () => {
           const val = parseInt(select.value, 10);
           this.editor.commands.heading(val);

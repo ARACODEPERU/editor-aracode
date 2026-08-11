@@ -513,7 +513,7 @@ const Y = [
   fullscreen: !1,
   table: !1
 };
-function S(i, e) {
+function A(i, e) {
   i.addEventListener("mousedown", (t) => {
     var n;
     (n = e == null ? void 0 : e.saveToolbarSelection) == null || n.call(e), t.preventDefault();
@@ -540,7 +540,9 @@ class ve {
         r.className = "aracode-toolbar-select", r.setAttribute("aria-label", g("heading", this.editor.options.locale)), ge.forEach((s) => {
           const l = document.createElement("option");
           l.value = s.value, l.textContent = s.label, r.appendChild(l);
-        }), S(r, this.editor), r.addEventListener("change", () => {
+        }), r.addEventListener("mousedown", () => {
+          this.editor.saveToolbarSelection();
+        }), r.addEventListener("change", () => {
           const s = parseInt(r.value, 10);
           this.editor.commands.heading(s), r.value = "0";
         }), t.appendChild(r), this.buttons.heading = r;
@@ -548,7 +550,7 @@ class ve {
       }
       if (n === "table") {
         const r = document.createElement("button");
-        r.type = "button", r.className = "aracode-toolbar-btn", r.innerHTML = q.table, r.title = g("table", this.editor.options.locale), r.dataset.tool = n, S(r, this.editor), r.addEventListener("click", (s) => {
+        r.type = "button", r.className = "aracode-toolbar-btn", r.innerHTML = q.table, r.title = g("table", this.editor.options.locale), r.dataset.tool = n, A(r, this.editor), r.addEventListener("click", (s) => {
           s.stopPropagation(), this.container.querySelectorAll(".aracode-font-popover").forEach((l) => l.remove()), this.tablePicker.toggle();
         }), t.appendChild(r), this.buttons.table = r;
         return;
@@ -557,7 +559,7 @@ class ve {
         const r = document.createElement("div");
         r.className = "aracode-font-picker";
         const s = document.createElement("button");
-        s.className = "aracode-toolbar-font-btn", s.type = "button", s.textContent = g("fontFamily", this.editor.options.locale), s.title = g("fontFamily", this.editor.options.locale), S(s, this.editor), s.addEventListener("click", (l) => {
+        s.className = "aracode-toolbar-font-btn", s.type = "button", s.textContent = g("fontFamily", this.editor.options.locale), s.title = g("fontFamily", this.editor.options.locale), A(s, this.editor), s.addEventListener("click", (l) => {
           l.stopPropagation(), this.tablePicker.close(), this.toggleFontPicker(r);
         }), r.appendChild(s), t.appendChild(r), this.buttons.fontFamily = s;
         return;
@@ -566,14 +568,14 @@ class ve {
         const r = document.createElement("div");
         r.className = "aracode-font-picker aracode-size-picker";
         const s = document.createElement("button");
-        s.className = "aracode-toolbar-font-btn", s.type = "button", s.textContent = g("fontSize", this.editor.options.locale), s.title = g("fontSize", this.editor.options.locale), S(s, this.editor), s.addEventListener("click", (l) => {
+        s.className = "aracode-toolbar-font-btn", s.type = "button", s.textContent = g("fontSize", this.editor.options.locale), s.title = g("fontSize", this.editor.options.locale), A(s, this.editor), s.addEventListener("click", (l) => {
           l.stopPropagation(), this.tablePicker.close(), this.toggleFontSizePicker(r);
         }), r.appendChild(s), t.appendChild(r), this.buttons.fontSize = s;
         return;
       }
       if (n === "textColor" || n === "backgroundColor") {
         const r = document.createElement("button");
-        r.type = "button", r.className = "aracode-toolbar-btn aracode-toolbar-color-btn", r.innerHTML = q[n] || "", r.title = g(n, this.editor.options.locale), r.dataset.tool = n, S(r, this.editor), r.addEventListener("click", (s) => {
+        r.type = "button", r.className = "aracode-toolbar-btn aracode-toolbar-color-btn", r.innerHTML = q[n] || "", r.title = g(n, this.editor.options.locale), r.dataset.tool = n, A(r, this.editor), r.addEventListener("click", (s) => {
           s.stopPropagation();
           const l = n === "textColor";
           this.editor.openColorPicker(r, l);
@@ -581,7 +583,7 @@ class ve {
         return;
       }
       const o = document.createElement("button");
-      o.type = "button", o.className = "aracode-toolbar-btn", o.innerHTML = q[n] || n, o.title = g(n, this.editor.options.locale), o.dataset.tool = n, S(o, this.editor), o.addEventListener("click", (r) => {
+      o.type = "button", o.className = "aracode-toolbar-btn", o.innerHTML = q[n] || n, o.title = g(n, this.editor.options.locale), o.dataset.tool = n, A(o, this.editor), o.addEventListener("click", (r) => {
         r.stopPropagation(), this.handleToolClick(n);
       }), t.appendChild(o), this.buttons[n] = o;
     }), t.children.length > 0 && this.container.appendChild(t);
@@ -692,7 +694,7 @@ class ve {
         }), s.appendChild(p);
       });
     };
-    r.addEventListener("input", l), S(r, this.editor), o.appendChild(r), o.appendChild(s), e.appendChild(o), l(), setTimeout(() => r.focus(), 0);
+    r.addEventListener("input", l), A(r, this.editor), o.appendChild(r), o.appendChild(s), e.appendChild(o), l(), setTimeout(() => r.focus(), 0);
   }
   toggleFontSizePicker(e) {
     const t = e.querySelector(".aracode-font-popover");
@@ -1089,11 +1091,11 @@ class Ee {
         x.className = "aracode-dialog-tab-headers";
         const C = document.createElement("div");
         C.className = "aracode-dialog-tab-contents", m.tabs.forEach((k, L) => {
-          const A = document.createElement("button");
-          A.className = "aracode-dialog-tab-btn" + (L === 0 ? " is-active" : ""), A.textContent = k.label, A.dataset.tabIndex = L;
+          const S = document.createElement("button");
+          S.className = "aracode-dialog-tab-btn" + (L === 0 ? " is-active" : ""), S.textContent = k.label, S.dataset.tabIndex = L;
           const P = document.createElement("div");
-          P.className = "aracode-dialog-tab-content" + (L === 0 ? " is-active" : ""), (k.fields || []).forEach((N) => w(N, P)), x.appendChild(A), C.appendChild(P), A.addEventListener("click", () => {
-            x.querySelectorAll(".aracode-dialog-tab-btn").forEach((N) => N.classList.remove("is-active")), C.querySelectorAll(".aracode-dialog-tab-content").forEach((N) => N.classList.remove("is-active")), A.classList.add("is-active"), P.classList.add("is-active"), u.style.display = L === 0 ? "" : "none", h.style.display = L === 1 ? "" : "none";
+          P.className = "aracode-dialog-tab-content" + (L === 0 ? " is-active" : ""), (k.fields || []).forEach((N) => w(N, P)), x.appendChild(S), C.appendChild(P), S.addEventListener("click", () => {
+            x.querySelectorAll(".aracode-dialog-tab-btn").forEach((N) => N.classList.remove("is-active")), C.querySelectorAll(".aracode-dialog-tab-content").forEach((N) => N.classList.remove("is-active")), S.classList.add("is-active"), P.classList.add("is-active"), u.style.display = L === 0 ? "" : "none", h.style.display = L === 1 ? "" : "none";
           });
         }), f.appendChild(x), f.appendChild(C), E.appendChild(f);
         return;
