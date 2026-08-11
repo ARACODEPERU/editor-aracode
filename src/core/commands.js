@@ -242,6 +242,36 @@ export class Commands {
     this.editor.emit('command', 'fontFamily', fontFamily);
   }
 
+  fontSize(size) {
+    const selection = window.getSelection();
+    if (!selection.rangeCount || selection.toString() === '') return;
+    const range = selection.getRangeAt(0);
+    if (!this.editor.editable.contains(range.commonAncestorContainer)) return;
+
+    this.editor.editable.focus();
+    const px = parseInt(size, 10) || 0;
+
+    if (!px) {
+      document.execCommand('fontSize', false, '3');
+      this.editor.editable.querySelectorAll('font[size]').forEach(fontEl => {
+        const span = document.createElement('span');
+        span.innerHTML = fontEl.innerHTML;
+        fontEl.parentNode.replaceChild(span, fontEl);
+      });
+    } else {
+      document.execCommand('fontSize', false, '7');
+      this.editor.editable.querySelectorAll('font[size]').forEach(fontEl => {
+        const span = document.createElement('span');
+        span.style.fontSize = `${px}px`;
+        span.innerHTML = fontEl.innerHTML;
+        fontEl.parentNode.replaceChild(span, fontEl);
+      });
+    }
+
+    this.editor.emit('change', this.editor.getHTML());
+    this.editor.emit('command', 'fontSize', px);
+  }
+
   insertImage(url, alt = '', width = '', height = '', align = '', savedRange = null) {
     const editable = this.editor.editable;
     const img = document.createElement('img');

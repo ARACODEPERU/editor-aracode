@@ -3,7 +3,7 @@ import { TablePicker } from '../ui/table-picker.js';
 
 const DEFAULT_TOOLS = [
   'bold', 'italic', 'underline', 'strikethrough', '|',
-  'heading', 'fontFamily', '|',
+  'heading', 'fontFamily', 'fontSize', '|',
   'orderedList', 'unorderedList', '|',
   'alignLeft', 'alignCenter', 'alignRight', 'alignJustify', '|',
   'link', 'unlink', 'image', 'table', '|',
@@ -21,6 +21,22 @@ const HEADING_OPTIONS = [
   { value: '4', label: 'H4' },
   { value: '5', label: 'H5' },
   { value: '6', label: 'H6' },
+];
+
+const FONT_SIZE_OPTIONS = [
+  { value: 0, label: 'Normal' },
+  { value: 10, label: '10px' },
+  { value: 12, label: '12px' },
+  { value: 14, label: '14px' },
+  { value: 16, label: '16px' },
+  { value: 18, label: '18px' },
+  { value: 20, label: '20px' },
+  { value: 24, label: '24px' },
+  { value: 28, label: '28px' },
+  { value: 32, label: '32px' },
+  { value: 36, label: '36px' },
+  { value: 42, label: '42px' },
+  { value: 48, label: '48px' },
 ];
 
 const TOOL_ICONS = {
@@ -190,6 +206,26 @@ export class Toolbar {
         return;
       }
 
+      if (tool === 'fontSize') {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'aracode-font-picker aracode-size-picker';
+        const btn = document.createElement('button');
+        btn.className = 'aracode-toolbar-font-btn';
+        btn.type = 'button';
+        btn.textContent = t('fontSize', this.editor.options.locale);
+        btn.title = t('fontSize', this.editor.options.locale);
+        preventFocusLoss(btn, this.editor);
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.tablePicker.close();
+          this.toggleFontSizePicker(wrapper);
+        });
+        wrapper.appendChild(btn);
+        group.appendChild(wrapper);
+        this.buttons.fontSize = btn;
+        return;
+      }
+
       if (tool === 'textColor' || tool === 'backgroundColor') {
         const btn = document.createElement('button');
         btn.type = 'button';
@@ -323,10 +359,49 @@ export class Toolbar {
     setTimeout(() => search.focus(), 0);
   }
 
+  toggleFontSizePicker(wrapper) {
+    const existing = wrapper.querySelector('.aracode-font-popover');
+    if (existing) {
+      existing.remove();
+      return;
+    }
+
+    this.container.querySelectorAll('.aracode-font-popover').forEach(popover => popover.remove());
+    const selection = window.getSelection();
+    const savedRange = selection.rangeCount > 0 ? selection.getRangeAt(0).cloneRange() : null;
+    const popover = document.createElement('div');
+    popover.className = 'aracode-font-popover aracode-size-popover';
+
+    const list = document.createElement('div');
+    list.className = 'aracode-size-list';
+
+    FONT_SIZE_OPTIONS.forEach(opt => {
+      const item = document.createElement('button');
+      item.type = 'button';
+      item.className = 'aracode-size-option';
+      if (!opt.value) item.classList.add('is-default');
+      item.innerHTML = `<span class="aracode-size-option-label">${opt.label}</span><span class="aracode-size-option-sample" style="font-size:${opt.value || 14}px">Aa</span>`;
+      item.addEventListener('mousedown', (e) => e.preventDefault());
+      item.addEventListener('click', () => {
+        if (savedRange) {
+          const sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(savedRange);
+        }
+        this.editor.commands.fontSize(opt.value);
+        popover.remove();
+      });
+      list.appendChild(item);
+    });
+
+    popover.appendChild(list);
+    wrapper.appendChild(popover);
+  }
+
   updateActiveStates() {
     const tools = this.editor.options.toolbar || DEFAULT_TOOLS;
     tools.forEach(tool => {
-      if (tool === '|' || tool === 'heading' || tool === 'fontFamily' || tool === 'table' || tool === 'textColor' || tool === 'backgroundColor') return;
+      if (tool === '|' || tool === 'heading' || tool === 'fontFamily' || tool === 'fontSize' || tool === 'table' || tool === 'textColor' || tool === 'backgroundColor') return;
       const btn = this.buttons[tool];
       if (!btn) return;
       const command = TOOL_COMMAND_STATE[tool];

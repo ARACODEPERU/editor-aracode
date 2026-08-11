@@ -6,6 +6,7 @@ const G = {
     strikethrough: "Tachado",
     heading: "Encabezado",
     fontFamily: "Fuente",
+    fontSize: "Tamaño de letra",
     fontSearchPlaceholder: "Buscar fuente...",
     search: "Buscar en el editor",
     searchPlaceholder: "Buscar texto...",
@@ -96,6 +97,7 @@ const G = {
     strikethrough: "Strikethrough",
     heading: "Heading",
     fontFamily: "Font",
+    fontSize: "Font size",
     fontSearchPlaceholder: "Search font...",
     search: "Search editor",
     searchPlaceholder: "Search text...",
@@ -237,17 +239,17 @@ class me {
     l.className = "aracode-table-picker-grid", l.setAttribute("role", "grid"), l.setAttribute("aria-label", g("table", e));
     for (let y = 0; y < J; y++)
       for (let f = 0; f < J; f++) {
-        const w = document.createElement("button");
-        w.type = "button", w.className = "aracode-table-picker-cell", w.dataset.row = String(y + 1), w.dataset.col = String(f + 1), w.setAttribute("aria-label", `${y + 1} × ${f + 1}`), w.addEventListener("mousedown", (C) => C.preventDefault()), w.addEventListener("mouseenter", () => this._setHover(y + 1, f + 1, l, s, e)), w.addEventListener("click", (C) => {
+        const x = document.createElement("button");
+        x.type = "button", x.className = "aracode-table-picker-cell", x.dataset.row = String(y + 1), x.dataset.col = String(f + 1), x.setAttribute("aria-label", `${y + 1} × ${f + 1}`), x.addEventListener("mousedown", (C) => C.preventDefault()), x.addEventListener("mouseenter", () => this._setHover(y + 1, f + 1, l, s, e)), x.addEventListener("click", (C) => {
           C.preventDefault(), C.stopPropagation(), this._insert(y + 1, f + 1);
-        }), l.appendChild(w);
+        }), l.appendChild(x);
       }
-    const d = document.createElement("div");
-    d.className = "aracode-table-picker-custom";
-    const c = document.createElement("label");
-    c.className = "aracode-table-picker-field", c.textContent = g("tableRows", e);
+    const c = document.createElement("div");
+    c.className = "aracode-table-picker-custom";
+    const d = document.createElement("label");
+    d.className = "aracode-table-picker-field", d.textContent = g("tableRows", e);
     const h = document.createElement("input");
-    h.type = "number", h.className = "aracode-table-picker-input", h.min = "1", h.max = String(I), h.value = "3", c.appendChild(h);
+    h.type = "number", h.className = "aracode-table-picker-input", h.min = "1", h.max = String(I), h.value = "3", d.appendChild(h);
     const u = document.createElement("label");
     u.className = "aracode-table-picker-field", u.textContent = g("tableCols", e);
     const p = document.createElement("input");
@@ -256,16 +258,16 @@ class me {
     b.type = "button", b.className = "aracode-btn aracode-btn-primary aracode-table-picker-insert", b.textContent = g("tableInsertCustom", e), b.addEventListener("mousedown", (y) => y.preventDefault()), b.addEventListener("click", (y) => {
       y.preventDefault(), y.stopPropagation(), this._insert(this._clampSize(h.value), this._clampSize(p.value));
     });
-    const x = (y) => {
+    const w = (y) => {
       y.key === "Enter" && (y.preventDefault(), b.click());
     };
-    h.addEventListener("keydown", x), p.addEventListener("keydown", x), d.appendChild(c), d.appendChild(u), d.appendChild(b);
+    h.addEventListener("keydown", w), p.addEventListener("keydown", w), c.appendChild(d), c.appendChild(u), c.appendChild(b);
     const T = document.createElement("label");
     T.className = "aracode-table-picker-option";
     const m = document.createElement("input");
     m.type = "checkbox", m.addEventListener("change", () => {
       this._headerRow = m.checked;
-    }), T.appendChild(m), T.appendChild(document.createTextNode(g("tableHeaderRow", e))), r.appendChild(s), r.appendChild(l), r.appendChild(d), r.appendChild(T);
+    }), T.appendChild(m), T.appendChild(document.createTextNode(g("tableHeaderRow", e))), r.appendChild(s), r.appendChild(l), r.appendChild(c), r.appendChild(T);
     const E = document.createElement("div");
     E.className = "aracode-dialog-footer";
     const v = document.createElement("button");
@@ -293,6 +295,7 @@ const Y = [
   "|",
   "heading",
   "fontFamily",
+  "fontSize",
   "|",
   "orderedList",
   "unorderedList",
@@ -330,6 +333,20 @@ const Y = [
   { value: "4", label: "H4" },
   { value: "5", label: "H5" },
   { value: "6", label: "H6" }
+], pe = [
+  { value: 0, label: "Normal" },
+  { value: 10, label: "10px" },
+  { value: 12, label: "12px" },
+  { value: 14, label: "14px" },
+  { value: 16, label: "16px" },
+  { value: 18, label: "18px" },
+  { value: 20, label: "20px" },
+  { value: 24, label: "24px" },
+  { value: 28, label: "28px" },
+  { value: 32, label: "32px" },
+  { value: 36, label: "36px" },
+  { value: 42, label: "42px" },
+  { value: 48, label: "48px" }
 ], q = {
   bold: "<strong>B</strong>",
   italic: "<em>I</em>",
@@ -357,7 +374,7 @@ const Y = [
   textColor: '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M11 3L5.5 17h2.25l1.12-3h6.25l1.12 3h2.25L13 3h-2zm-1.38 9L11 5.5 12.38 12H9.62z"/><path fill="currentColor" d="M3 21h18v-2H3v2z"/></svg>',
   backgroundColor: '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M16.56 8.94L7.62 0 6.21 1.41l2.38 2.38-5.15 5.15a1.49 1.49 0 0 0 0 2.12l5.5 5.5a1.5 1.5 0 0 0 2.12 0l5.15-5.15 2.38 2.38 1.41-1.41-2.38-2.38zM5.5 12.56l4.5-4.5 4.5 4.5-4.5 4.5-4.5-4.5z"/><path fill="currentColor" d="M3 21h18v-2H3v2z"/></svg>',
   search: '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M9.5 3a6.5 6.5 0 0 1 5.18 10.43l5.45 5.44-1.42 1.42-5.44-5.45A6.5 6.5 0 1 1 9.5 3zm0 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9z"/></svg>'
-}, pe = [
+}, fe = [
   "Inter",
   "Roboto",
   "Open Sans",
@@ -475,7 +492,7 @@ const Y = [
   "Courgette",
   "Sacramento",
   "Kaushan Script"
-], fe = {
+], be = {
   bold: "bold",
   italic: "italic",
   underline: "underline",
@@ -496,13 +513,13 @@ const Y = [
   fullscreen: !1,
   table: !1
 };
-function A(i, e) {
+function S(i, e) {
   i.addEventListener("mousedown", (t) => {
     var n;
     (n = e == null ? void 0 : e.saveToolbarSelection) == null || n.call(e), t.preventDefault();
   });
 }
-class be {
+class ve {
   constructor(e) {
     this.editor = e, this.container = document.createElement("div"), this.container.className = "aracode-toolbar", this.buttons = {}, this.tablePicker = new me(e, (t, n, a, o) => {
       this.editor.commands.insertTable(t, n, a, o);
@@ -523,7 +540,7 @@ class be {
         r.className = "aracode-toolbar-select", r.setAttribute("aria-label", g("heading", this.editor.options.locale)), ge.forEach((s) => {
           const l = document.createElement("option");
           l.value = s.value, l.textContent = s.label, r.appendChild(l);
-        }), A(r, this.editor), r.addEventListener("change", () => {
+        }), S(r, this.editor), r.addEventListener("change", () => {
           const s = parseInt(r.value, 10);
           this.editor.commands.heading(s), r.value = "0";
         }), t.appendChild(r), this.buttons.heading = r;
@@ -531,7 +548,7 @@ class be {
       }
       if (n === "table") {
         const r = document.createElement("button");
-        r.type = "button", r.className = "aracode-toolbar-btn", r.innerHTML = q.table, r.title = g("table", this.editor.options.locale), r.dataset.tool = n, A(r, this.editor), r.addEventListener("click", (s) => {
+        r.type = "button", r.className = "aracode-toolbar-btn", r.innerHTML = q.table, r.title = g("table", this.editor.options.locale), r.dataset.tool = n, S(r, this.editor), r.addEventListener("click", (s) => {
           s.stopPropagation(), this.container.querySelectorAll(".aracode-font-popover").forEach((l) => l.remove()), this.tablePicker.toggle();
         }), t.appendChild(r), this.buttons.table = r;
         return;
@@ -540,14 +557,23 @@ class be {
         const r = document.createElement("div");
         r.className = "aracode-font-picker";
         const s = document.createElement("button");
-        s.className = "aracode-toolbar-font-btn", s.type = "button", s.textContent = g("fontFamily", this.editor.options.locale), s.title = g("fontFamily", this.editor.options.locale), A(s, this.editor), s.addEventListener("click", (l) => {
+        s.className = "aracode-toolbar-font-btn", s.type = "button", s.textContent = g("fontFamily", this.editor.options.locale), s.title = g("fontFamily", this.editor.options.locale), S(s, this.editor), s.addEventListener("click", (l) => {
           l.stopPropagation(), this.tablePicker.close(), this.toggleFontPicker(r);
         }), r.appendChild(s), t.appendChild(r), this.buttons.fontFamily = s;
         return;
       }
+      if (n === "fontSize") {
+        const r = document.createElement("div");
+        r.className = "aracode-font-picker aracode-size-picker";
+        const s = document.createElement("button");
+        s.className = "aracode-toolbar-font-btn", s.type = "button", s.textContent = g("fontSize", this.editor.options.locale), s.title = g("fontSize", this.editor.options.locale), S(s, this.editor), s.addEventListener("click", (l) => {
+          l.stopPropagation(), this.tablePicker.close(), this.toggleFontSizePicker(r);
+        }), r.appendChild(s), t.appendChild(r), this.buttons.fontSize = s;
+        return;
+      }
       if (n === "textColor" || n === "backgroundColor") {
         const r = document.createElement("button");
-        r.type = "button", r.className = "aracode-toolbar-btn aracode-toolbar-color-btn", r.innerHTML = q[n] || "", r.title = g(n, this.editor.options.locale), r.dataset.tool = n, A(r, this.editor), r.addEventListener("click", (s) => {
+        r.type = "button", r.className = "aracode-toolbar-btn aracode-toolbar-color-btn", r.innerHTML = q[n] || "", r.title = g(n, this.editor.options.locale), r.dataset.tool = n, S(r, this.editor), r.addEventListener("click", (s) => {
           s.stopPropagation();
           const l = n === "textColor";
           this.editor.openColorPicker(r, l);
@@ -555,7 +581,7 @@ class be {
         return;
       }
       const o = document.createElement("button");
-      o.type = "button", o.className = "aracode-toolbar-btn", o.innerHTML = q[n] || n, o.title = g(n, this.editor.options.locale), o.dataset.tool = n, A(o, this.editor), o.addEventListener("click", (r) => {
+      o.type = "button", o.className = "aracode-toolbar-btn", o.innerHTML = q[n] || n, o.title = g(n, this.editor.options.locale), o.dataset.tool = n, S(o, this.editor), o.addEventListener("click", (r) => {
         r.stopPropagation(), this.handleToolClick(n);
       }), t.appendChild(o), this.buttons[n] = o;
     }), t.children.length > 0 && this.container.appendChild(t);
@@ -645,7 +671,7 @@ class be {
       t.remove();
       return;
     }
-    this.container.querySelectorAll(".aracode-font-popover").forEach((d) => d.remove());
+    this.container.querySelectorAll(".aracode-font-popover").forEach((c) => c.remove());
     const n = window.getSelection(), a = n.rangeCount > 0 ? n.getRangeAt(0).cloneRange() : null, o = document.createElement("div");
     o.className = "aracode-font-popover";
     const r = document.createElement("input");
@@ -653,7 +679,7 @@ class be {
     const s = document.createElement("div");
     s.className = "aracode-font-list";
     const l = () => {
-      const d = r.value.trim().toLowerCase(), h = (this.editor.options.fonts || pe).filter((u) => u.toLowerCase().includes(d)).slice(0, 40);
+      const c = r.value.trim().toLowerCase(), h = (this.editor.options.fonts || fe).filter((u) => u.toLowerCase().includes(c)).slice(0, 40);
       s.innerHTML = "", h.forEach((u) => {
         this.editor.loadFontFamily(u);
         const p = document.createElement("button");
@@ -666,14 +692,35 @@ class be {
         }), s.appendChild(p);
       });
     };
-    r.addEventListener("input", l), A(r, this.editor), o.appendChild(r), o.appendChild(s), e.appendChild(o), l(), setTimeout(() => r.focus(), 0);
+    r.addEventListener("input", l), S(r, this.editor), o.appendChild(r), o.appendChild(s), e.appendChild(o), l(), setTimeout(() => r.focus(), 0);
+  }
+  toggleFontSizePicker(e) {
+    const t = e.querySelector(".aracode-font-popover");
+    if (t) {
+      t.remove();
+      return;
+    }
+    this.container.querySelectorAll(".aracode-font-popover").forEach((s) => s.remove());
+    const n = window.getSelection(), a = n.rangeCount > 0 ? n.getRangeAt(0).cloneRange() : null, o = document.createElement("div");
+    o.className = "aracode-font-popover aracode-size-popover";
+    const r = document.createElement("div");
+    r.className = "aracode-size-list", pe.forEach((s) => {
+      const l = document.createElement("button");
+      l.type = "button", l.className = "aracode-size-option", s.value || l.classList.add("is-default"), l.innerHTML = `<span class="aracode-size-option-label">${s.label}</span><span class="aracode-size-option-sample" style="font-size:${s.value || 14}px">Aa</span>`, l.addEventListener("mousedown", (c) => c.preventDefault()), l.addEventListener("click", () => {
+        if (a) {
+          const c = window.getSelection();
+          c.removeAllRanges(), c.addRange(a);
+        }
+        this.editor.commands.fontSize(s.value), o.remove();
+      }), r.appendChild(l);
+    }), o.appendChild(r), e.appendChild(o);
   }
   updateActiveStates() {
     (this.editor.options.toolbar || Y).forEach((t) => {
-      if (t === "|" || t === "heading" || t === "fontFamily" || t === "table" || t === "textColor" || t === "backgroundColor") return;
+      if (t === "|" || t === "heading" || t === "fontFamily" || t === "fontSize" || t === "table" || t === "textColor" || t === "backgroundColor") return;
       const n = this.buttons[t];
       if (!n) return;
-      const a = fe[t];
+      const a = be[t];
       let o = !1;
       if (a)
         try {
@@ -689,7 +736,7 @@ class be {
     this.tablePicker.close(), this.container.parentNode && this.container.parentNode.removeChild(this.container), this.buttons = {};
   }
 }
-class ve {
+class ye {
   constructor(e) {
     this.editor = e;
   }
@@ -729,7 +776,7 @@ class ve {
     return (n == null ? void 0 : n.nodeType) === 3 && (n = n.parentElement), !!((a = n == null ? void 0 : n.closest) != null && a.call(n, e));
   }
   _insertListFallback(e, t) {
-    var d, c;
+    var c, d;
     const n = this.editor.editable, a = window.getSelection();
     if (t && (a.removeAllRanges(), a.addRange(t)), !a.rangeCount) {
       this._appendEmptyList(e);
@@ -737,7 +784,7 @@ class ve {
     }
     let o = a.anchorNode;
     (o == null ? void 0 : o.nodeType) === 3 && (o = o.parentElement);
-    const r = (d = o == null ? void 0 : o.closest) == null ? void 0 : d.call(o, "ul, ol");
+    const r = (c = o == null ? void 0 : o.closest) == null ? void 0 : c.call(o, "ul, ol");
     if (r && n.contains(r)) {
       if (r.tagName.toLowerCase() === e) {
         const h = Array.from(r.querySelectorAll(":scope > li")), u = r.parentNode;
@@ -757,7 +804,7 @@ class ve {
       u.appendChild(s.extractContents()), h.appendChild(u), s.insertNode(h), this._placeCaretIn(u);
       return;
     }
-    const l = (c = o == null ? void 0 : o.closest) == null ? void 0 : c.call(o, "p, div, h1, h2, h3, h4, h5, h6, blockquote, pre, li, td, th");
+    const l = (d = o == null ? void 0 : o.closest) == null ? void 0 : d.call(o, "p, div, h1, h2, h3, h4, h5, h6, blockquote, pre, li, td, th");
     if (l && n.contains(l) && l !== n) {
       const h = document.createElement(e), u = document.createElement("li");
       u.innerHTML = l.innerHTML || "<br>", h.appendChild(u), l.replaceWith(h), this._placeCaretIn(u);
@@ -830,8 +877,8 @@ class ve {
       const l = t || e;
       this.exec("insertHTML", `<a href="${e}"${n ? ' target="_blank"' : ""}>${l}</a>`);
     } else if (this.exec("createLink", e), n) {
-      const d = ((s = (r = o.getRangeAt(0).startContainer.parentElement) == null ? void 0 : r.closest) == null ? void 0 : s.call(r, "a")) || a.querySelector("a:not([target])");
-      d && d.setAttribute("target", "_blank");
+      const c = ((s = (r = o.getRangeAt(0).startContainer.parentElement) == null ? void 0 : r.closest) == null ? void 0 : s.call(r, "a")) || a.querySelector("a:not([target])");
+      c && c.setAttribute("target", "_blank");
     }
     this.editor.emit("change", this.editor.getHTML());
   }
@@ -848,12 +895,27 @@ class ve {
       o.style.fontFamily = a.getAttribute("face"), o.innerHTML = a.innerHTML, a.parentNode.replaceChild(o, a);
     }), this.editor.emit("change", this.editor.getHTML()), this.editor.emit("command", "fontFamily", e));
   }
+  fontSize(e) {
+    const t = window.getSelection();
+    if (!t.rangeCount || t.toString() === "") return;
+    const n = t.getRangeAt(0);
+    if (!this.editor.editable.contains(n.commonAncestorContainer)) return;
+    this.editor.editable.focus();
+    const a = parseInt(e, 10) || 0;
+    a ? (document.execCommand("fontSize", !1, "7"), this.editor.editable.querySelectorAll("font[size]").forEach((o) => {
+      const r = document.createElement("span");
+      r.style.fontSize = `${a}px`, r.innerHTML = o.innerHTML, o.parentNode.replaceChild(r, o);
+    })) : (document.execCommand("fontSize", !1, "3"), this.editor.editable.querySelectorAll("font[size]").forEach((o) => {
+      const r = document.createElement("span");
+      r.innerHTML = o.innerHTML, o.parentNode.replaceChild(r, o);
+    })), this.editor.emit("change", this.editor.getHTML()), this.editor.emit("command", "fontSize", a);
+  }
   insertImage(e, t = "", n = "", a = "", o = "", r = null) {
     const s = this.editor.editable, l = document.createElement("img");
     l.setAttribute("src", e), t && l.setAttribute("alt", t), n && (l.style.width = /^\d+$/.test(String(n)) ? n + "px" : n), l.style.height = "auto", o && (l.className = `align-${o}`), l.style.display = "inline";
-    const d = window.getSelection();
-    let c;
-    r && s.contains(r.commonAncestorContainer) ? c = r : d.rangeCount > 0 && s.contains(d.getRangeAt(0).commonAncestorContainer) && (c = d.getRangeAt(0)), c ? (c.deleteContents(), c.insertNode(l), c.setStartAfter(l), c.setEndAfter(l), d.removeAllRanges(), d.addRange(c)) : s.appendChild(l), this.editor.emit("change", this.editor.getHTML());
+    const c = window.getSelection();
+    let d;
+    r && s.contains(r.commonAncestorContainer) ? d = r : c.rangeCount > 0 && s.contains(c.getRangeAt(0).commonAncestorContainer) && (d = c.getRangeAt(0)), d ? (d.deleteContents(), d.insertNode(l), d.setStartAfter(l), d.setEndAfter(l), c.removeAllRanges(), c.addRange(d)) : s.appendChild(l), this.editor.emit("change", this.editor.getHTML());
   }
   textColor(e) {
     this.editor.editable.focus(), document.execCommand("styleWithCSS", !1, !0), document.execCommand("foreColor", !1, e || "#212529"), this.editor.emit("change", this.editor.getHTML()), this.editor.emit("command", "foreColor", e);
@@ -875,29 +937,29 @@ class ve {
     for (let p = 0; p < o; p++) {
       l += "<tr>";
       for (let b = 0; b < r; b++) {
-        const x = n && p === 0 ? "th" : "td";
-        l += `<${x}>&nbsp;</${x}>`;
+        const w = n && p === 0 ? "th" : "td";
+        l += `<${w}>&nbsp;</${w}>`;
       }
       l += "</tr>";
     }
     l += "</tbody></table>";
-    const d = document.createElement("div");
-    d.innerHTML = l;
-    const c = d.firstElementChild, h = window.getSelection();
+    const c = document.createElement("div");
+    c.innerHTML = l;
+    const d = c.firstElementChild, h = window.getSelection();
     let u;
     if (a && s.contains(a.commonAncestorContainer) ? u = a : h.rangeCount > 0 && s.contains(h.getRangeAt(0).commonAncestorContainer) && (u = h.getRangeAt(0)), s.focus(), u) {
-      u.collapse(!1), u.insertNode(c);
-      const p = c.querySelector("td, th");
+      u.collapse(!1), u.insertNode(d);
+      const p = d.querySelector("td, th");
       if (p) {
         const b = document.createRange();
         b.selectNodeContents(p), b.collapse(!0), h.removeAllRanges(), h.addRange(b);
       }
     } else
-      s.appendChild(c);
+      s.appendChild(d);
     this.editor.emit("change", this.editor.getHTML()), this.editor.emit("command", "insertTable", { rows: o, cols: r, headerRow: n });
   }
 }
-function ye(i, e, t) {
+function Ce(i, e, t) {
   i._countdownTimer && clearInterval(i._countdownTimer);
   let n = e;
   const a = document.createElement("div");
@@ -907,7 +969,7 @@ function ye(i, e, t) {
     }, 250));
   }, 1e3);
 }
-function Ce(i, e, t, n) {
+function xe(i, e, t, n) {
   const a = document.createElement("div");
   a.className = "aracode-dialog-file-wrapper", i.type = "file", i.className = "aracode-dialog-file-input", t.name && (i.name = t.name), i.accept = t.accept || "*/*", t.multiple && (i.multiple = !0);
   const o = document.createElement("div");
@@ -924,15 +986,15 @@ function Ce(i, e, t, n) {
     o._countdownTimer && clearInterval(o._countdownTimer);
     const l = o.querySelector(".aracode-dialog-dropzone-countdown");
     l && l.remove();
-    const d = new FileReader();
-    d.onload = (c) => {
-      const h = c.target.result;
+    const c = new FileReader();
+    c.onload = (d) => {
+      const h = d.target.result;
       e.value = { file: s, dataUrl: h, width: "", height: "" }, o.innerHTML = `<img src="${h}" class="aracode-dialog-dropzone-preview" />`, o.classList.add("has-image");
       const u = new Image();
       u.onload = () => {
         e.value.width = u.naturalWidth || u.width || "", e.value.height = u.naturalHeight || u.height || "";
       }, u.src = h;
-    }, d.readAsDataURL(s);
+    }, c.readAsDataURL(s);
   }
   return i.addEventListener("change", () => r(i.files[0])), o.addEventListener("dragover", (s) => {
     s.preventDefault(), o.classList.add("is-dragover");
@@ -940,7 +1002,7 @@ function Ce(i, e, t, n) {
     s.preventDefault(), o.classList.remove("is-dragover"), s.dataTransfer.files[0] && (i.files = s.dataTransfer.files, r(s.dataTransfer.files[0]));
   }), a.appendChild(i), a.appendChild(o), a;
 }
-class we {
+class Ee {
   constructor(e = {}) {
     this.options = e, this.overlay = null, this.dialog = null;
   }
@@ -956,24 +1018,24 @@ class we {
     s.className = "aracode-dialog-body";
     const l = document.createElement("div");
     l.className = "aracode-dialog-progress", l.innerHTML = '<div class="aracode-dialog-progress-bar"></div>', s.appendChild(l);
-    const d = document.createElement("div");
-    d.className = "aracode-dialog-footer";
-    const c = document.createElement("button");
-    c.className = "aracode-btn aracode-btn-secondary", c.textContent = this.options.cancelText || "Cancelar", c.addEventListener("click", () => this.close());
+    const c = document.createElement("div");
+    c.className = "aracode-dialog-footer";
+    const d = document.createElement("button");
+    d.className = "aracode-btn aracode-btn-secondary", d.textContent = this.options.cancelText || "Cancelar", d.addEventListener("click", () => this.close());
     const h = document.createElement("button");
     h.className = "aracode-btn aracode-btn-primary aracode-dialog-apply-btn", h.textContent = this.options.applyText || "Aplicar", h.style.display = "none";
     const u = document.createElement("button");
     u.className = "aracode-btn aracode-btn-primary aracode-dialog-upload-btn", u.textContent = this.options.uploadText || "Subir al servidor", u.style.display = "none";
     let p = null;
     const b = this;
-    function x(m, E) {
+    function w(m, E) {
       if (m.type === "file") {
-        const f = { value: null }, w = Ce(document.createElement("input"), f, m, m.placeholder);
+        const f = { value: null }, x = xe(document.createElement("input"), f, m, m.placeholder);
         if (m.label) {
           const C = document.createElement("div");
           C.className = "aracode-dialog-label", C.textContent = m.label, E.appendChild(C);
         }
-        E.appendChild(w), m.name && (a[m.name] = f);
+        E.appendChild(x), m.name && (a[m.name] = f);
         return;
       }
       if (m.type === "hidden") {
@@ -982,8 +1044,8 @@ class we {
       }
       if (m.type === "button") {
         const f = document.createElement("button");
-        f.className = `aracode-btn ${m.primary ? "aracode-btn-primary" : "aracode-btn-secondary"}`, f.textContent = m.label, f.style.marginTop = "12px", f.style.width = "100%", f.addEventListener("click", (w) => {
-          if (w.preventDefault(), m.onClick) {
+        f.className = `aracode-btn ${m.primary ? "aracode-btn-primary" : "aracode-btn-secondary"}`, f.textContent = m.label, f.style.marginTop = "12px", f.style.width = "100%", f.addEventListener("click", (x) => {
+          if (x.preventDefault(), m.onClick) {
             const C = {};
             for (const k of Object.keys(a)) {
               const L = a[k];
@@ -1005,35 +1067,35 @@ class we {
           const C = document.createElement("label");
           C.className = "aracode-dialog-label", C.textContent = m.label, f.appendChild(C);
         }
-        const w = document.createElement("select");
-        w.className = "aracode-dialog-input", m.name && (w.name = m.name), (m.options || []).forEach((C) => {
+        const x = document.createElement("select");
+        x.className = "aracode-dialog-input", m.name && (x.name = m.name), (m.options || []).forEach((C) => {
           const k = document.createElement("option");
-          k.value = C.value, k.textContent = C.label, w.appendChild(k);
-        }), m.value !== void 0 && (w.value = m.value), f.appendChild(w), E.appendChild(f), m.name && (a[m.name] = w);
+          k.value = C.value, k.textContent = C.label, x.appendChild(k);
+        }), m.value !== void 0 && (x.value = m.value), f.appendChild(x), E.appendChild(f), m.name && (a[m.name] = x);
         return;
       }
       if (m.type === "row") {
         const f = document.createElement("div");
-        f.className = "aracode-dialog-row", (m.fields || []).forEach((w) => {
+        f.className = "aracode-dialog-row", (m.fields || []).forEach((x) => {
           const C = document.createElement("div");
-          C.className = "aracode-dialog-cell", x(w, C), f.appendChild(C);
+          C.className = "aracode-dialog-cell", w(x, C), f.appendChild(C);
         }), E.appendChild(f);
         return;
       }
       if (m.type === "tabs") {
         const f = document.createElement("div");
         f.className = "aracode-dialog-tabs";
-        const w = document.createElement("div");
-        w.className = "aracode-dialog-tab-headers";
+        const x = document.createElement("div");
+        x.className = "aracode-dialog-tab-headers";
         const C = document.createElement("div");
         C.className = "aracode-dialog-tab-contents", m.tabs.forEach((k, L) => {
-          const S = document.createElement("button");
-          S.className = "aracode-dialog-tab-btn" + (L === 0 ? " is-active" : ""), S.textContent = k.label, S.dataset.tabIndex = L;
+          const A = document.createElement("button");
+          A.className = "aracode-dialog-tab-btn" + (L === 0 ? " is-active" : ""), A.textContent = k.label, A.dataset.tabIndex = L;
           const P = document.createElement("div");
-          P.className = "aracode-dialog-tab-content" + (L === 0 ? " is-active" : ""), (k.fields || []).forEach((N) => x(N, P)), w.appendChild(S), C.appendChild(P), S.addEventListener("click", () => {
-            w.querySelectorAll(".aracode-dialog-tab-btn").forEach((N) => N.classList.remove("is-active")), C.querySelectorAll(".aracode-dialog-tab-content").forEach((N) => N.classList.remove("is-active")), S.classList.add("is-active"), P.classList.add("is-active"), u.style.display = L === 0 ? "" : "none", h.style.display = L === 1 ? "" : "none";
+          P.className = "aracode-dialog-tab-content" + (L === 0 ? " is-active" : ""), (k.fields || []).forEach((N) => w(N, P)), x.appendChild(A), C.appendChild(P), A.addEventListener("click", () => {
+            x.querySelectorAll(".aracode-dialog-tab-btn").forEach((N) => N.classList.remove("is-active")), C.querySelectorAll(".aracode-dialog-tab-content").forEach((N) => N.classList.remove("is-active")), A.classList.add("is-active"), P.classList.add("is-active"), u.style.display = L === 0 ? "" : "none", h.style.display = L === 1 ? "" : "none";
           });
-        }), f.appendChild(w), f.appendChild(C), E.appendChild(f);
+        }), f.appendChild(x), f.appendChild(C), E.appendChild(f);
         return;
       }
       const v = document.createElement("div");
@@ -1044,7 +1106,7 @@ class we {
       const y = document.createElement("input");
       y.className = "aracode-dialog-input", m.name && (y.name = m.name), y.type = m.type === "checkbox" ? "checkbox" : "text", m.type === "checkbox" ? y.checked = m.value || !1 : (y.value = m.value || "", y.placeholder = m.placeholder || ""), m.autofocus && !p && (p = y), v.appendChild(y), m.name && (a[m.name] = y), E.appendChild(v);
     }
-    t.forEach((m) => x(m, s)), p && setTimeout(() => p.focus(), 50), h.addEventListener("click", async () => {
+    t.forEach((m) => w(m, s)), p && setTimeout(() => p.focus(), 50), h.addEventListener("click", async () => {
       const m = {};
       for (const E of Object.keys(a)) {
         const v = a[E];
@@ -1058,7 +1120,7 @@ class we {
         v instanceof HTMLInputElement || v instanceof HTMLSelectElement ? m[E] = v.type === "checkbox" ? v.checked : v.value : v && typeof v == "object" && "value" in v && (m[E] = v.value);
       }
       typeof this.options.onUpload == "function" && await this.options.onUpload(m, b);
-    }), d.appendChild(c), d.appendChild(u), d.appendChild(h), this.dialog.appendChild(o), this.dialog.appendChild(s), this.dialog.appendChild(d), this.dialog.querySelectorAll(".aracode-dialog-tab-btn").length > 0 && (u.style.display = "", h.style.display = "none"), this.overlay.appendChild(this.dialog), document.body.appendChild(this.overlay), this.overlay.addEventListener("click", (m) => {
+    }), c.appendChild(d), c.appendChild(u), c.appendChild(h), this.dialog.appendChild(o), this.dialog.appendChild(s), this.dialog.appendChild(c), this.dialog.querySelectorAll(".aracode-dialog-tab-btn").length > 0 && (u.style.display = "", h.style.display = "none"), this.overlay.appendChild(this.dialog), document.body.appendChild(this.overlay), this.overlay.addEventListener("click", (m) => {
       m.target === this.overlay && this.close();
     }), this._keyHandler = (m) => {
       m.key === "Escape" && this.close(), m.key === "Enter" && m.target.closest('.aracode-dialog-input:not([type="file"])') && h.click();
@@ -1088,7 +1150,7 @@ class we {
     this.close();
   }
 }
-const Ee = [
+const we = [
   "#000000",
   "#434343",
   "#666666",
@@ -1170,13 +1232,13 @@ const Ee = [
   "#20124d",
   "#4c1130"
 ];
-class xe {
+class Le {
   constructor(e) {
     this.onSelect = e, this._anchor = null, this._outsideHandler = null, this.container = document.createElement("div"), this.container.className = "aracode-color-picker", this.build();
   }
   build() {
     const e = document.createElement("div");
-    e.className = "aracode-color-picker-grid", Ee.forEach((n) => {
+    e.className = "aracode-color-picker-grid", we.forEach((n) => {
       const a = document.createElement("button");
       a.type = "button", a.className = "aracode-color-picker-swatch", a.style.backgroundColor = n, a.dataset.color = n, a.title = n, a.addEventListener("mousedown", (o) => o.preventDefault()), a.addEventListener("click", (o) => {
         o.preventDefault(), o.stopPropagation(), this.onSelect(n), this.hide();
@@ -1206,7 +1268,7 @@ class xe {
     this.hide(), this.container.parentNode && this.container.parentNode.removeChild(this.container);
   }
 }
-class Le {
+class Te {
   constructor(e) {
     this.editor = e, this.selectedImage = null, this.container = null, this._isDragging = !1, this._dropIndicator = null, this._dragStartPos = null, this._bindEvents();
   }
@@ -1272,18 +1334,18 @@ class Le {
     if (this._removeDropIndicator(), this.container && (this.container.style.opacity = ""), !this.selectedImage || !this.container) return;
     const n = this._getDropRange(e, t);
     if (!n) return;
-    const a = this.selectedImage, o = this.container, r = ["align-left", "align-center", "align-right"].find((d) => o.classList.contains(d));
+    const a = this.selectedImage, o = this.container, r = ["align-left", "align-center", "align-right"].find((c) => o.classList.contains(c));
     a.classList.remove("align-left", "align-center", "align-right"), r && a.classList.add(r), o.parentNode && (o.parentNode.insertBefore(a, o), o.parentNode.removeChild(o)), n.deleteContents(), n.insertNode(a);
     const s = document.createElement("span");
-    s.className = "aracode-img-container", r && s.classList.add(r), a.parentNode.insertBefore(s, a), s.appendChild(a), ["tl", "tr", "bl", "br"].forEach((d) => {
-      const c = document.createElement("div");
-      c.className = `aracode-img-resizer ${d}`, c.addEventListener("mousedown", (h) => this._onResizeStart(h, d)), s.appendChild(c);
+    s.className = "aracode-img-container", r && s.classList.add(r), a.parentNode.insertBefore(s, a), s.appendChild(a), ["tl", "tr", "bl", "br"].forEach((c) => {
+      const d = document.createElement("div");
+      d.className = `aracode-img-resizer ${c}`, d.addEventListener("mousedown", (h) => this._onResizeStart(h, c)), s.appendChild(d);
     }), this.selectedImage = a, this.container = s, this._initDrag(), this.editor.emit("change", this.editor.getHTML());
   }
   _onResizeStart(e, t) {
     e.preventDefault(), e.stopPropagation();
-    const n = this.selectedImage, a = e.clientX, o = n.offsetWidth, r = 40, s = (d) => {
-      const c = d.clientX - a, h = t === "tl" || t === "bl" ? -c : c, u = Math.max(r, o + h);
+    const n = this.selectedImage, a = e.clientX, o = n.offsetWidth, r = 40, s = (c) => {
+      const d = c.clientX - a, h = t === "tl" || t === "bl" ? -d : d, u = Math.max(r, o + h);
       n.style.width = u + "px", n.style.height = "auto";
     }, l = () => {
       document.removeEventListener("mousemove", s), document.removeEventListener("mouseup", l), this.editor.emit("change", this.editor.getHTML());
@@ -1300,11 +1362,11 @@ function ne(i, e) {
   const t = i.cells[e];
   return t ? t.tagName.toLowerCase() === "th" ? "th" : "td" : ((n = i.parentElement) == null ? void 0 : n.tagName) === "THEAD" ? "th" : "td";
 }
-function Te(i) {
+function ke(i) {
   return i.querySelector("tbody") || i;
 }
 function U(i) {
-  return Array.from(Te(i).querySelectorAll("tr"));
+  return Array.from(ke(i).querySelectorAll("tr"));
 }
 function _(i, e) {
   if (!i) return;
@@ -1313,7 +1375,7 @@ function _(i, e) {
   const n = window.getSelection();
   n.removeAllRanges(), n.addRange(t), e.focus();
 }
-function ke(i, e) {
+function _e(i, e) {
   const t = i.parentElement;
   if (!(t == null ? void 0 : t.closest("table")) || !t) return null;
   const a = document.createElement("tr"), o = t.cells.length || 1;
@@ -1323,7 +1385,7 @@ function ke(i, e) {
   const r = a.cells[i.cellIndex] || a.cells[0];
   return _(r, e.editable), r;
 }
-function _e(i, e) {
+function Se(i, e) {
   const t = i.parentElement;
   if (!(t == null ? void 0 : t.closest("table")) || !t) return null;
   const a = document.createElement("tr"), o = t.cells.length || 1;
@@ -1333,31 +1395,31 @@ function _e(i, e) {
   const r = a.cells[i.cellIndex] || a.cells[0];
   return _(r, e.editable), r;
 }
-function Se(i, e) {
-  const t = i.closest("table");
-  if (!t) return null;
-  const n = i.cellIndex;
-  U(t).forEach((r) => {
-    var c;
-    const s = r.cells[n], l = ((c = s == null ? void 0 : s.tagName) == null ? void 0 : c.toLowerCase()) === "th" ? "th" : "td", d = M(l);
-    s ? r.insertBefore(d, s) : r.insertBefore(d, r.firstChild);
-  }), e.emit("change", e.getHTML());
-  const a = i.parentElement, o = a == null ? void 0 : a.cells[n];
-  return _(o, e.editable), o;
-}
 function Ae(i, e) {
   const t = i.closest("table");
   if (!t) return null;
   const n = i.cellIndex;
   U(t).forEach((r) => {
-    var c;
-    const s = r.cells[n], l = ((c = s == null ? void 0 : s.tagName) == null ? void 0 : c.toLowerCase()) === "th" ? "th" : "td", d = s == null ? void 0 : s.nextSibling;
-    d ? r.insertBefore(M(l), d) : r.appendChild(M(l));
+    var d;
+    const s = r.cells[n], l = ((d = s == null ? void 0 : s.tagName) == null ? void 0 : d.toLowerCase()) === "th" ? "th" : "td", c = M(l);
+    s ? r.insertBefore(c, s) : r.insertBefore(c, r.firstChild);
+  }), e.emit("change", e.getHTML());
+  const a = i.parentElement, o = a == null ? void 0 : a.cells[n];
+  return _(o, e.editable), o;
+}
+function He(i, e) {
+  const t = i.closest("table");
+  if (!t) return null;
+  const n = i.cellIndex;
+  U(t).forEach((r) => {
+    var d;
+    const s = r.cells[n], l = ((d = s == null ? void 0 : s.tagName) == null ? void 0 : d.toLowerCase()) === "th" ? "th" : "td", c = s == null ? void 0 : s.nextSibling;
+    c ? r.insertBefore(M(l), c) : r.appendChild(M(l));
   }), e.emit("change", e.getHTML());
   const a = i.parentElement, o = (a == null ? void 0 : a.cells[n + 1]) || (a == null ? void 0 : a.cells[n]);
   return _(o, e.editable), o;
 }
-function He(i, e) {
+function Ne(i, e) {
   const t = i.parentElement, n = t == null ? void 0 : t.closest("table");
   if (!n || !t) return null;
   const a = U(n);
@@ -1367,7 +1429,7 @@ function He(i, e) {
   const l = (r == null ? void 0 : r.cells[s]) || (r == null ? void 0 : r.cells[0]);
   return _(l, e.editable), l;
 }
-function Ne(i, e) {
+function Ie(i, e) {
   var s;
   const t = i.closest("table");
   if (!t) return null;
@@ -1379,7 +1441,7 @@ function Ne(i, e) {
     l.cells[o] && l.cells[o].remove(), r || (r = l.cells[o] || l.cells[o - 1] || l.cells[0]);
   }), e.emit("change", e.getHTML()), _(r, e.editable), r;
 }
-function Ie(i, e) {
+function Me(i, e) {
   const t = i.closest("table");
   if (!t) return;
   const n = t.nextElementSibling, a = t.previousElementSibling;
@@ -1397,7 +1459,7 @@ function Ie(i, e) {
   const r = document.createElement("p");
   r.innerHTML = "<br>", o.appendChild(r), _(r, o);
 }
-class Me {
+class Re {
   constructor(e) {
     this.editor = e, this.menu = null, this._cell = null, this._outsideHandler = null, this._escapeHandler = null;
   }
@@ -1405,33 +1467,33 @@ class Me {
     this.close(), this._cell = e;
     const a = this.editor.options.locale, o = document.createElement("div");
     o.className = "aracode-table-context-menu", o.setAttribute("role", "menu"), [
-      { id: "insertRowAbove", label: g("tableInsertRowAbove", a), action: () => ke(e, this.editor) },
-      { id: "insertRowBelow", label: g("tableInsertRowBelow", a), action: () => _e(e, this.editor) },
+      { id: "insertRowAbove", label: g("tableInsertRowAbove", a), action: () => _e(e, this.editor) },
+      { id: "insertRowBelow", label: g("tableInsertRowBelow", a), action: () => Se(e, this.editor) },
       { type: "separator" },
-      { id: "insertColumnLeft", label: g("tableInsertColumnLeft", a), action: () => Se(e, this.editor) },
-      { id: "insertColumnRight", label: g("tableInsertColumnRight", a), action: () => Ae(e, this.editor) },
+      { id: "insertColumnLeft", label: g("tableInsertColumnLeft", a), action: () => Ae(e, this.editor) },
+      { id: "insertColumnRight", label: g("tableInsertColumnRight", a), action: () => He(e, this.editor) },
       { type: "separator" },
-      { id: "deleteRow", label: g("tableDeleteRow", a), action: () => He(e, this.editor) },
-      { id: "deleteColumn", label: g("tableDeleteColumn", a), action: () => Ne(e, this.editor) },
+      { id: "deleteRow", label: g("tableDeleteRow", a), action: () => Ne(e, this.editor) },
+      { id: "deleteColumn", label: g("tableDeleteColumn", a), action: () => Ie(e, this.editor) },
       { type: "separator" },
-      { id: "deleteTable", label: g("tableDeleteTable", a), action: () => Ie(e, this.editor), danger: !0 }
-    ].forEach((c) => {
-      if (c.type === "separator") {
+      { id: "deleteTable", label: g("tableDeleteTable", a), action: () => Me(e, this.editor), danger: !0 }
+    ].forEach((d) => {
+      if (d.type === "separator") {
         const u = document.createElement("div");
         u.className = "aracode-table-context-menu-sep", o.appendChild(u);
         return;
       }
       const h = document.createElement("button");
-      h.type = "button", h.className = "aracode-table-context-menu-item", c.danger && h.classList.add("is-danger"), h.textContent = c.label, h.setAttribute("role", "menuitem"), h.addEventListener("mousedown", (u) => u.preventDefault()), h.addEventListener("click", (u) => {
-        u.preventDefault(), u.stopPropagation(), c.action(), this.close();
+      h.type = "button", h.className = "aracode-table-context-menu-item", d.danger && h.classList.add("is-danger"), h.textContent = d.label, h.setAttribute("role", "menuitem"), h.addEventListener("mousedown", (u) => u.preventDefault()), h.addEventListener("click", (u) => {
+        u.preventDefault(), u.stopPropagation(), d.action(), this.close();
       }), o.appendChild(h);
     }), document.body.appendChild(o), this.menu = o;
     const s = o.getBoundingClientRect();
-    let l = t, d = n;
-    l + s.width > window.innerWidth && (l = window.innerWidth - s.width - 8), d + s.height > window.innerHeight && (d = window.innerHeight - s.height - 8), o.style.left = `${Math.max(8, l)}px`, o.style.top = `${Math.max(8, d)}px`, this._outsideHandler = (c) => {
-      o.contains(c.target) || this.close();
-    }, this._escapeHandler = (c) => {
-      c.key === "Escape" && this.close();
+    let l = t, c = n;
+    l + s.width > window.innerWidth && (l = window.innerWidth - s.width - 8), c + s.height > window.innerHeight && (c = window.innerHeight - s.height - 8), o.style.left = `${Math.max(8, l)}px`, o.style.top = `${Math.max(8, c)}px`, this._outsideHandler = (d) => {
+      o.contains(d.target) || this.close();
+    }, this._escapeHandler = (d) => {
+      d.key === "Escape" && this.close();
     }, setTimeout(() => {
       document.addEventListener("mousedown", this._outsideHandler, !0), document.addEventListener("keydown", this._escapeHandler);
     }, 0);
@@ -1441,9 +1503,9 @@ class Me {
     this._outsideHandler && (document.removeEventListener("mousedown", this._outsideHandler, !0), this._outsideHandler = null), this._escapeHandler && (document.removeEventListener("keydown", this._escapeHandler), this._escapeHandler = null), (e = this.menu) != null && e.parentNode && this.menu.parentNode.removeChild(this.menu), this.menu = null, this._cell = null;
   }
 }
-class Re {
+class De {
   constructor(e) {
-    this.editor = e, this.contextMenu = new Me(e), this._bindEvents();
+    this.editor = e, this.contextMenu = new Re(e), this._bindEvents();
   }
   _bindEvents() {
     this.editor.editable.addEventListener("keydown", (e) => {
@@ -1482,12 +1544,12 @@ class Re {
     if (s < r.length - 1) return r[s + 1];
     if (o < a.length - 1)
       return a[o + 1].cells[0] || null;
-    const d = (n.querySelector("tbody") || n).insertRow(), c = r.length || 1;
-    for (let h = 0; h < c; h++) {
+    const c = (n.querySelector("tbody") || n).insertRow(), d = r.length || 1;
+    for (let h = 0; h < d; h++) {
       const u = document.createElement("td");
-      u.innerHTML = "&nbsp;", d.appendChild(u);
+      u.innerHTML = "&nbsp;", c.appendChild(u);
     }
-    return this.editor.emit("change", this.editor.getHTML()), d.cells[0] || null;
+    return this.editor.emit("change", this.editor.getHTML()), c.cells[0] || null;
   }
   _findPreviousCell(e) {
     const t = e.parentElement, n = t == null ? void 0 : t.closest("table");
@@ -1510,14 +1572,14 @@ class Re {
     this.contextMenu.close();
   }
 }
-const De = ["BLOCKQUOTE", "PRE"];
+const Pe = ["BLOCKQUOTE", "PRE"];
 function R(i) {
   return String(i || "").replace(/\u00a0/g, " ").trim();
 }
-function Pe(i, e) {
+function ze(i, e) {
   let t = (i == null ? void 0 : i.nodeType) === Node.TEXT_NODE ? i.parentElement : i;
   for (; t && t !== e; ) {
-    if (De.includes(t.tagName)) return t;
+    if (Pe.includes(t.tagName)) return t;
     t = t.parentElement;
   }
   return null;
@@ -1534,9 +1596,9 @@ function Fe(i, e) {
   t.selectNodeContents(i), t.setEnd(e.startContainer, e.startOffset);
   const n = e.startContainer, a = e.startOffset;
   if (n.nodeType === Node.TEXT_NODE) {
-    const l = n.textContent.slice(0, a), d = l.lastIndexOf(`
+    const l = n.textContent.slice(0, a), c = l.lastIndexOf(`
 `);
-    if (d !== -1) return l.slice(d + 1);
+    if (c !== -1) return l.slice(c + 1);
   }
   const o = document.createTreeWalker(i, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
   let r = "", s = !1;
@@ -1560,12 +1622,12 @@ function Fe(i, e) {
   }
   return s ? r : t.toString();
 }
-function ze(i, e) {
+function Be(i, e) {
   if (!e.rangeCount) return !1;
   const t = e.getRangeAt(0);
   return !t.collapsed || R(ae(i, t)) !== "" ? !1 : R(Fe(i, t)) === "";
 }
-function Be(i) {
+function Ue(i) {
   for (; i.lastChild; ) {
     const e = i.lastChild;
     if (e.nodeName === "BR") {
@@ -1583,7 +1645,7 @@ function Be(i) {
     break;
   }
 }
-function Ue(i, e, t) {
+function Oe(i, e, t) {
   const n = document.createRange();
   n.selectNodeContents(i), n.collapse(!0), e.removeAllRanges(), e.addRange(n), t.focus();
 }
@@ -1594,18 +1656,18 @@ function Q(i, e) {
     t = t.nextElementSibling, n.remove();
   }
 }
-function Oe(i, e, t) {
+function $e(i, e, t) {
   const n = document.createElement("p");
-  n.innerHTML = "<br>", D(i) ? (i.parentNode.insertBefore(n, i), i.remove(), Q(n)) : (Be(i), i.parentNode.insertBefore(n, i.nextSibling), Q(i)), Ue(n, t, e);
+  n.innerHTML = "<br>", D(i) ? (i.parentNode.insertBefore(n, i), i.remove(), Q(n)) : (Ue(i), i.parentNode.insertBefore(n, i.nextSibling), Q(i)), Oe(n, t, e);
 }
-function $e(i, e) {
+function qe(i, e) {
   if (e.key !== "Enter" || e.shiftKey) return !1;
   const t = i.editable, n = window.getSelection();
   if (!n.rangeCount) return !1;
-  const a = Pe(n.anchorNode, t);
+  const a = ze(n.anchorNode, t);
   if (!a || a.tagName !== "BLOCKQUOTE") return !1;
   const o = R(ae(a, n.getRangeAt(0))) === "";
-  return D(a) || ze(a, n) || o && !D(a) ? (e.preventDefault(), Oe(a, t, n), i.emit("change", i.getHTML()), !0) : !1;
+  return D(a) || Be(a, n) || o && !D(a) ? (e.preventDefault(), $e(a, t, n), i.emit("change", i.getHTML()), !0) : !1;
 }
 function ie(i) {
   const e = i.match(/\w{2}/g);
@@ -1627,14 +1689,14 @@ function oe(i) {
   }
   return a;
 }
-function qe(i) {
+function Ve(i) {
   return Array.from(i.querySelectorAll("img")).filter((e) => {
     const t = e.getAttribute("src") || "";
     return t.startsWith("file://") || t === "";
   });
 }
-function Ve(i, e) {
-  const t = qe(i), n = oe(e);
+function We(i, e) {
+  const t = Ve(i), n = oe(e);
   if (!t.length || !n.length)
     return 0;
   const a = Math.min(t.length, n.length);
@@ -1663,7 +1725,7 @@ function re(i) {
     }
   }).filter(Boolean);
 }
-async function We(i) {
+async function je(i) {
   var n;
   if (!i) return "";
   let e = i.getData("text/rtf") || i.getData("application/rtf");
@@ -1688,7 +1750,7 @@ async function We(i) {
     }
   return "";
 }
-const je = /* @__PURE__ */ new Set([
+const Xe = /* @__PURE__ */ new Set([
   "P",
   "BR",
   "DIV",
@@ -1728,7 +1790,7 @@ const je = /* @__PURE__ */ new Set([
   "SUP",
   "HR",
   "FONT"
-]), Xe = /* @__PURE__ */ new Set([
+]), Ke = /* @__PURE__ */ new Set([
   "SCRIPT",
   "STYLE",
   "META",
@@ -1745,7 +1807,7 @@ const je = /* @__PURE__ */ new Set([
   "V:SHAPETYPE",
   "V:IMAGEDATA",
   "V:TEXTBOX"
-]), Ke = /<!--\[if gte mso[\s\S]*?endif\]-->/gi, Ge = /<!--\[if gte vml[\s\S]*?<!\[endif\]-->/gi, Je = /<!--\[if !vml\]-->([\s\S]*?)<!--\[endif\]-->/gi;
+]), Ge = /<!--\[if gte mso[\s\S]*?endif\]-->/gi, Je = /<!--\[if gte vml[\s\S]*?<!\[endif\]-->/gi, Ye = /<!--\[if !vml\]-->([\s\S]*?)<!--\[endif\]-->/gi;
 function Z(i, e) {
   const t = parseFloat(i);
   return !Number.isFinite(t) || t <= 0 ? null : e === "pt" ? `${Math.round(t * 1.333)}px` : `${Math.round(t)}px`;
@@ -1753,9 +1815,9 @@ function Z(i, e) {
 function X(i) {
   if (!i) return "";
   let e = i;
-  return e = e.replace(Je, (t, n) => n), e = e.replace(Ge, ""), e = e.replace(Ke, ""), e = e.replace(/<\/?\?xml[^>]*>/gi, ""), e = e.replace(/<!\[if !supportLists\][\s\S]*?<!\[endif\]>/gi, ""), e = e.replace(/<!\[if !supportLineBreakNewLine\][\s\S]*?<!\[endif\]>/gi, ""), e;
+  return e = e.replace(Ye, (t, n) => n), e = e.replace(Je, ""), e = e.replace(Ge, ""), e = e.replace(/<\/?\?xml[^>]*>/gi, ""), e = e.replace(/<!\[if !supportLists\][\s\S]*?<!\[endif\]>/gi, ""), e = e.replace(/<!\[if !supportLineBreakNewLine\][\s\S]*?<!\[endif\]>/gi, ""), e;
 }
-function Ye(i) {
+function Qe(i) {
   const e = [];
   let t;
   const n = /<!--\[if gte vml 1\]>([\s\S]*?)<!\[endif\]-->/gi;
@@ -1768,10 +1830,10 @@ function Ye(i) {
   }
   return e;
 }
-function Qe(i, e, t, n, a = []) {
+function Ze(i, e, t, n, a = []) {
   const o = e.options.locale, r = g("pasteImageUploading", o), s = [], l = e.editable.ownerDocument;
-  for (let d = n; d < t.length; d += 1) {
-    const c = t[d], h = a[d - n] || {}, u = {
+  for (let c = n; c < t.length; c += 1) {
+    const d = t[c], h = a[c - n] || {}, u = {
       width: h.width || "150px",
       height: h.height || "200px",
       display: "inline-block"
@@ -1780,7 +1842,7 @@ function Qe(i, e, t, n, a = []) {
     const b = l.createElement("div");
     b.style.overflow = "hidden", b.appendChild(p), i.firstChild ? i.insertBefore(b, i.firstChild) : i.appendChild(b), s.push({
       placeholder: p,
-      file: c,
+      file: d,
       meta: {
         alt: "",
         widthAttr: "",
@@ -1812,8 +1874,8 @@ function le(i) {
   var a, o, r;
   if (!i) return [];
   const e = [], t = /* @__PURE__ */ new Set(), n = (s) => {
-    var d;
-    if (!s || !((d = s.type) != null && d.startsWith("image/"))) return;
+    var c;
+    if (!s || !((c = s.type) != null && c.startsWith("image/"))) return;
     const l = `${s.name}|${s.size}|${s.type}|${s.lastModified}`;
     t.has(l) || (t.add(l), e.push(s));
   };
@@ -1825,7 +1887,7 @@ function le(i) {
       (r = s.type) != null && r.startsWith("image/") && n(s.getAsFile());
   return e;
 }
-async function Ze() {
+async function et() {
   var i;
   if (!((i = navigator.clipboard) != null && i.read)) return [];
   try {
@@ -1854,7 +1916,7 @@ function ce(i) {
   }
   return e;
 }
-function et(i) {
+function tt(i) {
   if (!i) return 0;
   const e = X(i);
   let n = new DOMParser().parseFromString(e, "text/html").querySelectorAll("img").length;
@@ -1867,9 +1929,9 @@ function de(i) {
   const e = [], t = X(i);
   new DOMParser().parseFromString(t, "text/html").querySelectorAll("img").forEach((s, l) => {
     var u;
-    const d = s.getAttribute("src") || "";
-    if (!d.startsWith("data:image/")) return;
-    const c = ((u = d.match(/^data:([^;,]+)/)) == null ? void 0 : u[1]) || "image/png", h = B(d, `html-${l}.${H(c)}`);
+    const c = s.getAttribute("src") || "";
+    if (!c.startsWith("data:image/")) return;
+    const d = ((u = c.match(/^data:([^;,]+)/)) == null ? void 0 : u[1]) || "image/png", h = B(c, `html-${l}.${H(d)}`);
     h && e.push(h);
   });
   const a = /<v:imagedata[^>]+src=["'](data:image\/[^"']+)["']/gi;
@@ -1880,7 +1942,7 @@ function de(i) {
   }
   return e;
 }
-function tt(i, e, t = "") {
+function nt(i, e, t = "") {
   const n = e || "", a = t || (i == null ? void 0 : i.getData("text/rtf")) || (i == null ? void 0 : i.getData("application/rtf")) || "";
   return {
     clipboardFiles: le(i),
@@ -1891,7 +1953,7 @@ function tt(i, e, t = "") {
     rtfFiles: re(a)
   };
 }
-async function nt(i, e = []) {
+async function at(i, e = []) {
   if (!e.length) return i;
   const t = await Promise.all(e);
   return i.clipboardFiles = K(
@@ -1899,11 +1961,11 @@ async function nt(i, e = []) {
     ...t.filter(Array.isArray)
   ), i;
 }
-function at(i) {
+function it(i) {
   const e = (i.getAttribute("src") || "").trim();
   return !e || e.startsWith("data:image/") || e.startsWith("blob:") ? !0 : /^https?:\/\//i.test(e) ? !1 : (/^file:/i.test(e) || /^cid:/i.test(e), !0);
 }
-async function it(i, e) {
+async function ot(i, e) {
   try {
     const n = await (await fetch(i)).blob();
     if (!n.type.startsWith("image/")) return null;
@@ -1920,15 +1982,15 @@ function B(i, e) {
   const n = t[1], a = t[2];
   let o;
   if (i.includes(";base64,")) {
-    const d = atob(a);
-    o = new Uint8Array(d.length);
-    for (let c = 0; c < d.length; c += 1)
-      o[c] = d.charCodeAt(c);
+    const c = atob(a);
+    o = new Uint8Array(c.length);
+    for (let d = 0; d < c.length; d += 1)
+      o[d] = c.charCodeAt(d);
   } else {
-    const d = decodeURIComponent(a);
-    o = new Uint8Array(d.length);
-    for (let c = 0; c < d.length; c += 1)
-      o[c] = d.charCodeAt(c);
+    const c = decodeURIComponent(a);
+    o = new Uint8Array(c.length);
+    for (let d = 0; d < c.length; d += 1)
+      o[d] = c.charCodeAt(d);
   }
   const r = ((l = n.split("/")[1]) == null ? void 0 : l.replace("jpeg", "jpg")) || "png", s = e || `paste-${Date.now()}.${r}`;
   return new File([o], s, { type: n });
@@ -1943,7 +2005,7 @@ function H(i) {
     "image/svg+xml": "svg"
   }[i] || "png";
 }
-function F(i) {
+function z(i) {
   if (!i) return null;
   const e = String(i).trim();
   if (!e) return null;
@@ -1952,15 +2014,15 @@ function F(i) {
   const t = parseFloat(e);
   return Number.isFinite(t) && t > 0 ? `${Math.round(t)}px` : null;
 }
-function ot(i) {
-  const e = F(i.getAttribute("width")) || F(i.style.width) || null, t = F(i.getAttribute("height")) || F(i.style.height) || null;
+function rt(i) {
+  const e = z(i.getAttribute("width")) || z(i.style.width) || null, t = z(i.getAttribute("height")) || z(i.style.height) || null;
   return {
     width: e || "120px",
     height: t || "80px",
     display: i.style.display || "inline-block"
   };
 }
-function rt(i) {
+function st(i) {
   return X(i);
 }
 function V(i, e) {
@@ -1969,13 +2031,13 @@ function V(i, e) {
   if (i.nodeType !== Node.ELEMENT_NODE)
     return null;
   const t = i.tagName.toUpperCase();
-  if (Xe.has(t))
+  if (Ke.has(t))
     return null;
   if (t === "IMG") {
     const a = e.createElement("img"), o = i.getAttribute("src") || "";
     return o && !/^javascript:/i.test(o) && !/^file:/i.test(o) && !/^cid:/i.test(o) && a.setAttribute("src", o), i.getAttribute("alt") && a.setAttribute("alt", i.getAttribute("alt")), i.getAttribute("width") && a.setAttribute("width", i.getAttribute("width")), i.getAttribute("height") && a.setAttribute("height", i.getAttribute("height")), i.getAttribute("style") && a.setAttribute("style", i.getAttribute("style")), i.className && (a.className = i.className), a;
   }
-  if (!je.has(t)) {
+  if (!Xe.has(t)) {
     const a = e.createDocumentFragment();
     return i.childNodes.forEach((o) => {
       const r = V(o, e);
@@ -2002,20 +2064,20 @@ function V(i, e) {
   }
   return n;
 }
-function st(i, e, t = "") {
+function lt(i, e, t = "") {
   var s;
-  const n = rt(i), a = new DOMParser().parseFromString(n, "text/html");
-  t && Ve(a, t);
+  const n = st(i), a = new DOMParser().parseFromString(n, "text/html");
+  t && We(a, t);
   const o = e.createDocumentFragment();
   return (((s = a.body) == null ? void 0 : s.childNodes) || []).forEach((l) => {
-    const d = V(l, e);
-    d && o.appendChild(d);
+    const c = V(l, e);
+    c && o.appendChild(c);
   }), o;
 }
-async function lt(i, e, t, n) {
+async function ct(i, e, t, n) {
   var o;
   const a = (i.getAttribute("src") || "").trim();
-  if (!at(i))
+  if (!it(i))
     return { file: null, keepOriginal: !0 };
   if (a.startsWith("data:image/")) {
     const r = ((o = a.match(/^data:([^;,]+)/)) == null ? void 0 : o[1]) || "image/png", s = B(
@@ -2025,7 +2087,7 @@ async function lt(i, e, t, n) {
     return t.total += 1, { file: s, keepOriginal: !1 };
   }
   if (a.startsWith("blob:")) {
-    const r = await it(a, `paste-${n}-${t.total}.png`);
+    const r = await ot(a, `paste-${n}-${t.total}.png`);
     return t.total += 1, { file: r, keepOriginal: !1 };
   }
   if (e.clipboardFiles[t.clipboard]) {
@@ -2056,18 +2118,18 @@ function he(i, e, t, n) {
   const o = a.querySelector(".aracode-paste-image__spinner");
   return o && o.remove(), a;
 }
-function ct(i, e, t) {
+function dt(i, e, t) {
   const n = i.createElement("img");
   return n.setAttribute("src", t), e.alt && n.setAttribute("alt", e.alt), e.widthAttr && n.setAttribute("width", e.widthAttr), e.heightAttr && n.setAttribute("height", e.heightAttr), e.style && n.setAttribute("style", e.style), e.className && (n.className = e.className), n.style.maxWidth = "100%", n.style.height = "auto", n;
 }
-function dt(i) {
+function ht(i) {
   return {
     alt: i.getAttribute("alt") || "",
     widthAttr: i.getAttribute("width") || "",
     heightAttr: i.getAttribute("height") || "",
     style: i.getAttribute("style") || "",
     className: i.className || "",
-    dimensions: ot(i)
+    dimensions: rt(i)
   };
 }
 function W(i, e) {
@@ -2077,13 +2139,13 @@ function W(i, e) {
     o.textContent = a, t.appendChild(o);
   }), t;
 }
-function ht(i) {
+function ut(i) {
   const e = window.getSelection();
   if (!(e != null && e.rangeCount)) return null;
   const t = e.getRangeAt(0);
   return i.editable.contains(t.commonAncestorContainer) ? t.cloneRange() : null;
 }
-function z(i, e) {
+function F(i, e) {
   var a;
   if (!i || !((a = e == null ? void 0 : e.childNodes) != null && a.length))
     return;
@@ -2093,7 +2155,7 @@ function z(i, e) {
   const n = window.getSelection();
   n.removeAllRanges(), n.addRange(i);
 }
-function ut(i, e) {
+function mt(i, e) {
   i != null && i.parentNode && i.parentNode.replaceChild(e, i);
 }
 function ee(i, e, t) {
@@ -2116,8 +2178,8 @@ async function j(i, e, t, n) {
     if (!o)
       throw new Error(g("imageUploadError", i.options.locale));
     i._trackUploadedImage(o, e);
-    const r = ct(a, n, o);
-    ut(t, r);
+    const r = dt(a, n, o);
+    mt(t, r);
   } catch (o) {
     console.error("Error al pegar imagen", o), ee(
       i,
@@ -2127,28 +2189,28 @@ async function j(i, e, t, n) {
   }
 }
 async function te(i, e, t, n = []) {
-  const a = i.options.locale, o = g("pasteImageUploading", a), r = Date.now(), s = { clipboard: 0, htmlData: 0, rtf: 0, total: 0 }, l = [], d = e.querySelectorAll("img");
-  for (const h of d) {
-    const u = dt(h), { file: p, keepOriginal: b } = await lt(h, t, s, r);
+  const a = i.options.locale, o = g("pasteImageUploading", a), r = Date.now(), s = { clipboard: 0, htmlData: 0, rtf: 0, total: 0 }, l = [], c = e.querySelectorAll("img");
+  for (const h of c) {
+    const u = ht(h), { file: p, keepOriginal: b } = await ct(h, t, s, r);
     if (b)
       continue;
-    const x = O(), T = p ? $(i, x, u.dimensions, o) : he(i, x, u.dimensions, g("pasteImageMissing", a));
+    const w = O(), T = p ? $(i, w, u.dimensions, o) : he(i, w, u.dimensions, g("pasteImageMissing", a));
     h.parentNode.replaceChild(T, h), p && l.push({
       placeholder: T,
       file: p,
       meta: u
     });
   }
-  const c = [
+  const d = [
     ...t.clipboardFiles.slice(s.clipboard),
     ...t.htmlDataFiles.slice(s.htmlData),
     ...t.rtfFiles.slice(s.rtf)
   ];
-  return c.length && l.push(
-    ...Qe(e, i, c, 0, n)
+  return d.length && l.push(
+    ...Ze(e, i, d, 0, n)
   ), { fragment: e, uploadTasks: l };
 }
-function mt(i, e) {
+function gt(i, e) {
   return e.length > 0 ? !0 : i ? /<(img|table|p|div|span|ul|ol|li|h[1-6]|strong|em|br)\b/i.test(i) : !1;
 }
 function ue(i, e, t) {
@@ -2169,18 +2231,18 @@ function ue(i, e, t) {
     dimensions: a
   });
 }
-async function gt(i, e, t, n = []) {
-  const a = e.getData("text/html"), o = e.getData("text/plain"), r = await We(e);
-  let s = tt(e, a, r);
-  n.length && (s = await nt(s, n));
-  const l = s.clipboardFiles, d = Ye(a || ""), c = t;
-  if (!c) return;
+async function pt(i, e, t, n = []) {
+  const a = e.getData("text/html"), o = e.getData("text/plain"), r = await je(e);
+  let s = nt(e, a, r);
+  n.length && (s = await at(s, n));
+  const l = s.clipboardFiles, c = Qe(a || ""), d = t;
+  if (!d) return;
   if (!a && l.length >= 1) {
     if (l.length === 1)
-      await ue(i, l[0], c);
+      await ue(i, l[0], d);
     else {
-      const x = i.editable.ownerDocument.createDocumentFragment(), { uploadTasks: T } = await te(i, x, s, d);
-      z(c, x), T.length && await Promise.all(
+      const w = i.editable.ownerDocument.createDocumentFragment(), { uploadTasks: T } = await te(i, w, s, c);
+      F(d, w), T.length && await Promise.all(
         T.map(
           ({ placeholder: m, file: E, meta: v }) => j(i, E, m, v)
         )
@@ -2192,24 +2254,24 @@ async function gt(i, e, t, n = []) {
   if (!a) {
     if (o) {
       const b = W(o, i.editable.ownerDocument);
-      z(c, b), i.emit("change", i.getHTML());
+      F(d, b), i.emit("change", i.getHTML());
     }
     return;
   }
   const h = i.editable.ownerDocument;
-  let u = st(a, h, r);
+  let u = lt(a, h, r);
   !u.childNodes.length && o && (u = W(o, h));
-  const { uploadTasks: p } = await te(i, u, s, d);
-  z(c, u), p.length && await Promise.all(
+  const { uploadTasks: p } = await te(i, u, s, c);
+  F(d, u), p.length && await Promise.all(
     p.map(
-      ({ placeholder: b, file: x, meta: T }) => j(i, x, b, T)
+      ({ placeholder: b, file: w, meta: T }) => j(i, w, b, T)
     )
   ), i.emit("change", i.getHTML());
 }
-function pt(i, e, t, n, a) {
-  return !!(e.length > 0 || t.length > 0 || n.length > 0 || a > 0 || i && mt(i, e));
+function ft(i, e, t, n, a) {
+  return !!(e.length > 0 || t.length > 0 || n.length > 0 || a > 0 || i && gt(i, e));
 }
-function ft(i) {
+function bt(i) {
   i.editable.addEventListener("paste", (e) => {
     var h;
     if (!se(i)) return;
@@ -2220,26 +2282,26 @@ function ft(i) {
     ), s = K(
       de(n || ""),
       ce(n || "")
-    ), l = et(n || "");
-    if (!pt(n, o, r, s, l) || !n && !o.length && !r.length && !l && a)
+    ), l = tt(n || "");
+    if (!ft(n, o, r, s, l) || !n && !o.length && !r.length && !l && a)
       return;
-    const d = ht(i);
-    if (!d) return;
+    const c = ut(i);
+    if (!c) return;
     e.preventDefault();
-    const c = [];
-    (h = navigator.clipboard) != null && h.read && c.push(
+    const d = [];
+    (h = navigator.clipboard) != null && h.read && d.push(
       Promise.race([
-        Ze(),
+        et(),
         new Promise((u) => window.setTimeout(() => u([]), 300))
       ])
-    ), gt(i, t, d, c).catch((u) => {
+    ), pt(i, t, c, d).catch((u) => {
       console.error("Error al procesar pegado", u);
       const p = W(a, i.editable.ownerDocument);
-      z(d, p), i.emit("change", i.getHTML());
+      F(c, p), i.emit("change", i.getHTML());
     });
   });
 }
-const bt = {
+const vt = {
   height: 400,
   placeholder: null,
   toolbar: null,
@@ -2256,15 +2318,15 @@ const bt = {
   pasteImageUpload: null,
   fonts: null
 };
-class vt {
+class yt {
   constructor(e, t = {}) {
-    if (this.options = { ...bt, ...t }, this._events = {}, this._isFullscreen = !1, this._isSourceView = !1, this._sourceTextarea = null, this._loadedFonts = /* @__PURE__ */ new Set(), this._searchPanel = null, this._uploadedImages = /* @__PURE__ */ new Map(), this._syncingImages = !1, this.container = e instanceof HTMLElement ? e : document.querySelector(e), !this.container) throw new Error("AracodeEditor: element not found");
-    this.container.classList.add("aracode-editor-container"), this.container.classList.add(`aracode-theme-${this.options.theme}`), this.commands = new ve(this), this.toolbar = new be(this), this.dialog = new we({
+    if (this.options = { ...vt, ...t }, this._events = {}, this._isFullscreen = !1, this._isSourceView = !1, this._sourceTextarea = null, this._loadedFonts = /* @__PURE__ */ new Set(), this._searchPanel = null, this._uploadedImages = /* @__PURE__ */ new Map(), this._syncingImages = !1, this.container = e instanceof HTMLElement ? e : document.querySelector(e), !this.container) throw new Error("AracodeEditor: element not found");
+    this.container.classList.add("aracode-editor-container"), this.container.classList.add(`aracode-theme-${this.options.theme}`), this.commands = new ye(this), this.toolbar = new ve(this), this.dialog = new Ee({
       cancelText: g("linkDialogCancel", this.options.locale),
       applyText: g("linkDialogApply", this.options.locale)
     }), this.colorPicker = null, this.editable = document.createElement("div"), this.editable.className = "aracode-editable", this.editable.contentEditable = !this.options.readOnly, this.editable.setAttribute("role", "textbox"), this.editable.setAttribute("aria-multiline", "true"), this.editable.innerHTML = this.options.value || "";
     const n = this.options.placeholder || g("placeholder", this.options.locale);
-    this.editable.dataset.placeholder = n, this.container.appendChild(this.toolbar.container), this.container.appendChild(this.editable), this.imageController = new Le(this), this.tableController = new Re(this), this.options.height && (this.editable.style.minHeight = `${this.options.height}px`), this._toolbarSavedRange = null, this._ensureFontPreconnect(), this._bindEvents(), this.emit("ready");
+    this.editable.dataset.placeholder = n, this.container.appendChild(this.toolbar.container), this.container.appendChild(this.editable), this.imageController = new Te(this), this.tableController = new De(this), this.options.height && (this.editable.style.minHeight = `${this.options.height}px`), this._toolbarSavedRange = null, this._ensureFontPreconnect(), this._bindEvents(), this.emit("ready");
   }
   saveToolbarSelection() {
     const e = window.getSelection();
@@ -2307,8 +2369,8 @@ class vt {
     }), this.editable.addEventListener("keyup", () => {
       this.toolbar.updateActiveStates();
     }), this.editable.addEventListener("keydown", (e) => {
-      $e(this, e);
-    }), ft(this), this.editable.addEventListener("dragover", (e) => {
+      qe(this, e);
+    }), bt(this), this.editable.addEventListener("dragover", (e) => {
       e.preventDefault(), e.dataTransfer.dropEffect = "copy", this.editable.classList.add("aracode-dragover");
     }), this.editable.addEventListener("dragleave", () => {
       this.editable.classList.remove("aracode-dragover");
@@ -2530,18 +2592,18 @@ class vt {
       const l = r.upload;
       if (l && l.file)
         try {
-          const d = await this._uploadImageFile(l.file, s);
-          if (d) {
-            s.setValue("url", d);
-            const c = s.dialog.querySelector(".aracode-dialog-url-preview");
-            c && (c.src = d, c.style.display = "block");
+          const c = await this._uploadImageFile(l.file, s);
+          if (c) {
+            s.setValue("url", c);
+            const d = s.dialog.querySelector(".aracode-dialog-url-preview");
+            d && (d.src = c, d.style.display = "block");
             const h = s.dialog.querySelector(".aracode-dialog-dropzone");
-            h ? (h.classList.add("is-counting"), ye(h, 3, () => {
+            h ? (h.classList.add("is-counting"), Ce(h, 3, () => {
               s.switchTab(1);
             })) : s.switchTab(1);
           }
-        } catch (d) {
-          console.error(g("imageUploadError", e), d), alert(g("imageUploadError", e));
+        } catch (c) {
+          console.error(g("imageUploadError", e), c), alert(g("imageUploadError", e));
         }
     }, this.dialog.open(
       g("imageDialogTitle", e),
@@ -2585,13 +2647,13 @@ class vt {
         }
       ],
       async (r) => {
-        const s = r.url || "", l = r.alt || "", d = r.width || "", c = r.height || "", h = r.align || "";
+        const s = r.url || "", l = r.alt || "", c = r.width || "", d = r.height || "", h = r.align || "";
         if (s) {
           if (t) {
             const u = window.getSelection();
             u.removeAllRanges(), u.addRange(t);
           }
-          this.commands.insertImage(s, l, d, c, h, t);
+          this.commands.insertImage(s, l, c, d, h, t);
         }
       }
     );
@@ -2601,20 +2663,20 @@ class vt {
     });
   }
   async _uploadImageFile(e, t = null, n = "") {
-    var d;
+    var c;
     if (typeof this.options.imageUploadHandler == "function") {
       t && t.updateProgress(10);
-      const c = await this.options.imageUploadHandler(e);
-      return t && t.updateProgress(100), typeof c == "string" ? c : this._extractUploadUrl(c);
+      const d = await this.options.imageUploadHandler(e);
+      return t && t.updateProgress(100), typeof d == "string" ? d : this._extractUploadUrl(d);
     }
     if (!this.options.imageUploadUrl)
       return null;
     const a = new FormData();
     a.append(this.options.imageUploadFieldName || "image", e), n && a.append("target_url", n);
-    const o = (d = document.querySelector('meta[name="csrf-token"]')) == null ? void 0 : d.getAttribute("content");
+    const o = (c = document.querySelector('meta[name="csrf-token"]')) == null ? void 0 : c.getAttribute("content");
     if (this.options.imageUploadParams)
-      for (const [c, h] of Object.entries(this.options.imageUploadParams))
-        a.append(c, h);
+      for (const [d, h] of Object.entries(this.options.imageUploadParams))
+        a.append(d, h);
     o && a.set("_token", o);
     const r = { ...this.options.imageUploadHeaders || {} };
     o && (r["X-CSRF-TOKEN"] = o), t && t.updateProgress(20);
@@ -2736,15 +2798,15 @@ class vt {
     const r = document.createElement("div");
     r.className = "aracode-search-results", e.appendChild(t), e.appendChild(o), e.appendChild(r), this.container.insertBefore(e, this.editable), this._searchPanel = e;
     const s = () => {
-      const l = n.value.trim(), d = l ? this._findSearchMatches(l) : [];
-      if (r.innerHTML = "", o.textContent = l ? `${d.length} ${g("searchResults", this.options.locale)}` : "", l && d.length === 0) {
-        const c = document.createElement("div");
-        c.className = "aracode-search-empty", c.textContent = g("searchEmpty", this.options.locale), r.appendChild(c);
+      const l = n.value.trim(), c = l ? this._findSearchMatches(l) : [];
+      if (r.innerHTML = "", o.textContent = l ? `${c.length} ${g("searchResults", this.options.locale)}` : "", l && c.length === 0) {
+        const d = document.createElement("div");
+        d.className = "aracode-search-empty", d.textContent = g("searchEmpty", this.options.locale), r.appendChild(d);
         return;
       }
-      d.forEach((c) => {
+      c.forEach((d) => {
         const h = document.createElement("button");
-        h.type = "button", h.className = "aracode-search-result", h.innerHTML = `<span>Línea ${c.line}</span><strong>${this._escapeHTML(c.preview)}</strong>`, h.addEventListener("mousedown", (u) => u.preventDefault()), h.addEventListener("click", () => this._selectSearchMatch(c)), r.appendChild(h);
+        h.type = "button", h.className = "aracode-search-result", h.innerHTML = `<span>Línea ${d.line}</span><strong>${this._escapeHTML(d.preview)}</strong>`, h.addEventListener("mousedown", (u) => u.preventDefault()), h.addEventListener("click", () => this._selectSearchMatch(d)), r.appendChild(h);
       });
     };
     n.addEventListener("input", s), n.addEventListener("mousedown", (l) => l.preventDefault()), a.addEventListener("mousedown", (l) => l.preventDefault()), a.addEventListener("click", () => this.toggleSearchPanel()), setTimeout(() => n.focus(), 0);
@@ -2752,17 +2814,17 @@ class vt {
   _findSearchMatches(e) {
     const t = Array.from(this.editable.querySelectorAll("p,h1,h2,h3,h4,h5,h6,li,blockquote,pre,div")).filter((r) => !r.closest(".aracode-search-panel")), n = t.length ? t : [this.editable], a = e.toLowerCase(), o = [];
     return n.forEach((r, s) => {
-      const l = r.textContent || "", d = l.toLowerCase();
-      let c = d.indexOf(a);
-      for (; c !== -1; ) {
-        const h = Math.max(0, c - 24), u = Math.min(l.length, c + e.length + 24);
+      const l = r.textContent || "", c = l.toLowerCase();
+      let d = c.indexOf(a);
+      for (; d !== -1; ) {
+        const h = Math.max(0, d - 24), u = Math.min(l.length, d + e.length + 24);
         o.push({
           node: r,
           line: s + 1,
-          start: c,
-          end: c + e.length,
+          start: d,
+          end: d + e.length,
           preview: l.slice(h, u).trim()
-        }), c = d.indexOf(a, c + e.length);
+        }), d = c.indexOf(a, d + e.length);
       }
     }), o;
   }
@@ -2774,18 +2836,18 @@ class vt {
   }
   _rangeFromTextOffsets(e, t, n) {
     const a = document.createTreeWalker(e, NodeFilter.SHOW_TEXT);
-    let o = 0, r = null, s = 0, l = null, d = 0;
+    let o = 0, r = null, s = 0, l = null, c = 0;
     for (; a.nextNode(); ) {
       const h = a.currentNode, u = o + h.nodeValue.length;
       if (!r && t >= o && t <= u && (r = h, s = t - o), !l && n >= o && n <= u) {
-        l = h, d = n - o;
+        l = h, c = n - o;
         break;
       }
       o = u;
     }
     if (!r || !l) return null;
-    const c = document.createRange();
-    return c.setStart(r, s), c.setEnd(l, d), c;
+    const d = document.createRange();
+    return d.setStart(r, s), d.setEnd(l, c), d;
   }
   _escapeHTML(e) {
     const t = document.createElement("div");
@@ -2804,7 +2866,7 @@ class vt {
       const l = n.getRangeAt(0);
       this.editable.contains(l.commonAncestorContainer) && (a = l.cloneRange());
     }
-    this.colorPicker = new xe((l) => {
+    this.colorPicker = new Le((l) => {
       a && (n.removeAllRanges(), n.addRange(a)), t ? this.commands.textColor(l) : this.commands.backgroundColor(l);
     }), this.colorPicker.show(e);
   }
@@ -2829,6 +2891,6 @@ class vt {
   }
 }
 export {
-  vt as default
+  yt as default
 };
 //# sourceMappingURL=aracode-editor.es.js.map

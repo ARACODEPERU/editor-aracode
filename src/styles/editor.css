@@ -228,6 +228,51 @@
   background: var(--aracode-btn-hover-bg);
 }
 
+.aracode-size-popover {
+  width: 180px;
+}
+
+.aracode-size-list {
+  max-height: 260px;
+  margin-top: 8px;
+  overflow-y: auto;
+}
+
+.aracode-size-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--aracode-editable-color);
+  cursor: pointer;
+  text-align: left;
+}
+
+.aracode-size-option:hover {
+  background: var(--aracode-btn-hover-bg);
+}
+
+.aracode-size-option.is-default {
+  border-bottom: 1px solid var(--aracode-toolbar-border);
+  margin-bottom: 4px;
+  padding-bottom: 8px;
+}
+
+.aracode-size-option-label {
+  font-size: 13px;
+}
+
+.aracode-size-option-sample {
+  line-height: 1;
+  font-family: inherit;
+  color: var(--aracode-btn-color);
+}
+
 /* === Editable === */
 .aracode-editable {
   padding: 16px 20px;
